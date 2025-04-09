@@ -2,6 +2,7 @@ use anyhow::{Result, anyhow};
 use log::info;
 use pnet::datalink::NetworkInterface;
 use pnet::datalink::{self};
+use pnet::packet::ethernet::EthernetPacket;
 
 use crate::firewall::engine::FirewallEngine;
 
@@ -17,7 +18,8 @@ pub async fn run_sniffer(interface: NetworkInterface, engine: FirewallEngine) ->
     loop {
         match rx.next() {
             Ok(packet) => {
-                println!("handling packet");
+                let packet = EthernetPacket::new(packet).unwrap();
+                engine.process(&packet);
             }
             Err(_) => {
                 return Err(anyhow!("Error fetching next packet"));

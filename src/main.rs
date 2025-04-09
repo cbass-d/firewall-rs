@@ -1,6 +1,7 @@
 use anyhow::{Result, anyhow};
 use clap::Parser;
 use datalink::Channel::Ethernet;
+use firewall::engine;
 use log::{error, info};
 use pnet::datalink::{self, NetworkInterface};
 use pnet::packet::Packet;
@@ -34,7 +35,6 @@ async fn main() -> Result<()> {
     let cfg = Config::parse();
 
     let firewall_rules: firewall::rules::RuleSet = confy::load("firewall-rs", "firewall-rules")?;
-    println!("{:?}", firewall_rules);
 
     let mut engine = firewall::engine::FirewallEngine::new(firewall_rules);
 
