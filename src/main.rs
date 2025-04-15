@@ -9,7 +9,9 @@ use pnet::packet::ethernet::{EtherTypes, EthernetPacket};
 use pnet::packet::ipv4::Ipv4Packet;
 use pnet::transport::{self, TransportChannelType, TransportReceiver};
 use serde::{Deserialize, Serialize};
+use std::net::Shutdown;
 use std::path::Path;
+use tokio::sync::broadcast::{self};
 use tokio::task::JoinSet;
 
 mod firewall;
@@ -35,8 +37,7 @@ async fn main() -> Result<()> {
     let cfg = Config::parse();
 
     let firewall_rules: firewall::rules::RuleSet = confy::load("firewall-rs", "firewall-rules")?;
-
-    let mut engine = firewall::engine::FirewallEngine::new(firewall_rules);
+    let local_data_dir = dirs::data_local_dir().unwrap();
 
     let phy_interfaces = datalink::interfaces();
 
@@ -47,7 +48,8 @@ async fn main() -> Result<()> {
 
     match interface {
         Some(interface) => {
-            let _ = net::sniffer::run_sniffer(interface.clone(), engine).await?;
+            let mut engine =
+                firewall::engine::FirewallEngine::new(interface.name.clone(), firewall_rules);
         }
         None => {
             error!("[-] Interface not found");

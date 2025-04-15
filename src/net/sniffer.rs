@@ -6,7 +6,7 @@ use pnet::packet::ethernet::EthernetPacket;
 
 use crate::firewall::engine::FirewallEngine;
 
-pub async fn run_sniffer(interface: NetworkInterface, engine: FirewallEngine) -> Result<()> {
+pub async fn run_sniffer(interface: NetworkInterface, mut engine: FirewallEngine) -> Result<()> {
     let (mut tx, mut rx) = match datalink::channel(&interface, Default::default()) {
         Ok(datalink::Channel::Ethernet(tx, rx)) => (tx, rx),
         Ok(_) => return Err(anyhow!("Unhandled channel type")),
@@ -15,15 +15,13 @@ pub async fn run_sniffer(interface: NetworkInterface, engine: FirewallEngine) ->
 
     info!("[+] Firewall running on {}...", interface.name);
 
-    loop {
-        match rx.next() {
-            Ok(packet) => {
-                let packet = EthernetPacket::new(packet).unwrap();
-                engine.process(&packet);
-            }
-            Err(_) => {
-                return Err(anyhow!("Error fetching next packet"));
-            }
+    match rx.next() {
+        Ok(packet) => {
+            let packet = EthernetPacket::new(packet).unwrap();
+            engine.process(&packet);
+        }
+        Err(_) => {
+            return Err(anyhow!("Error fetching next packet"));
         }
     }
 

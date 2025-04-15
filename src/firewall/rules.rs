@@ -11,14 +11,15 @@ pub enum Action {
     Log,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Rule {
-    sources: HashSet<IpAddr>,
-    destinations: HashSet<IpAddr>,
+    pub sources: HashSet<IpAddr>,
+    pub destinations: HashSet<IpAddr>,
+    pub ports: HashSet<u32>,
 }
 
 impl Rule {
-    pub fn contains(&self, address: &IpAddr) -> bool {
+    pub fn contains_addr(&self, address: &IpAddr) -> bool {
         self.sources.contains(address) || self.destinations.contains(address)
     }
 }
@@ -28,6 +29,7 @@ impl Default for Rule {
         Self {
             sources: HashSet::new(),
             destinations: HashSet::new(),
+            ports: HashSet::new(),
         }
     }
 }
@@ -42,11 +44,11 @@ impl fmt::Display for Rule {
     }
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct RuleSet {
-    allow: Rule,
-    deny: Rule,
-    log: Rule,
+    pub allow: Rule,
+    pub deny: Rule,
+    pub log: Rule,
 }
 
 impl Default for RuleSet {
@@ -61,13 +63,13 @@ impl Default for RuleSet {
 
 impl RuleSet {
     pub fn matches_allow(&self, address: &IpAddr) -> bool {
-        self.allow.contains(address)
+        self.allow.contains_addr(address)
     }
     pub fn matches_deny(&self, address: &IpAddr) -> bool {
-        self.deny.contains(address)
+        self.deny.contains_addr(address)
     }
     pub fn matches_log(&self, address: &IpAddr) -> bool {
-        self.log.contains(address)
+        self.log.contains_addr(address)
     }
 }
 
