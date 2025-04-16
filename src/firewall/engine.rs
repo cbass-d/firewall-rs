@@ -1,7 +1,9 @@
 use super::interface::InterfaceStats;
-use super::nft;
+use super::nftables;
 use super::rules::RuleSet;
 use core::net::IpAddr;
+use log::{debug, error, info};
+use nfq::Queue;
 use pnet::packet::Packet;
 use pnet::packet::ethernet::{EtherTypes, EthernetPacket};
 use pnet::packet::ipv4::Ipv4Packet;
@@ -10,11 +12,14 @@ use pnet::packet::ipv6::Ipv6Packet;
 pub struct FirewallEngine {
     rules: RuleSet,
     interface_stats: InterfaceStats,
+    nf_queue: Queue,
 }
 
 impl FirewallEngine {
     pub fn new(iface_name: String, rules: RuleSet) -> Self {
-        match nft::create_new_table("bleh", rules.clone()) {
+        let mut nf_queue = Queue::open().unwrap();
+        nf_queue.bind(0).unwrap();
+        match nftables::create_new_table("bleh", rules.clone()) {
             Ok(()) => {
                 println!("bleh");
             }
@@ -26,6 +31,17 @@ impl FirewallEngine {
         Self {
             rules,
             interface_stats: InterfaceStats::new(iface_name),
+            nf_queue,
+        }
+    }
+
+    pub async fn run(&mut self) {
+        info!("Engine is running");
+
+        loop {
+            let mut msg = self.nf_queue.recv().unwrap();
+
+            debug!("Received message");
         }
     }
 

@@ -2,7 +2,7 @@ use anyhow::{Result, anyhow};
 use clap::Parser;
 use datalink::Channel::Ethernet;
 use firewall::engine;
-use log::{error, info};
+use log::{debug, error, info, log};
 use pnet::datalink::{self, NetworkInterface};
 use pnet::packet::Packet;
 use pnet::packet::ethernet::{EtherTypes, EthernetPacket};
@@ -15,7 +15,6 @@ use tokio::sync::broadcast::{self};
 use tokio::task::JoinSet;
 
 mod firewall;
-mod net;
 
 #[derive(Parser, Serialize, Deserialize, Default)]
 struct Config {
@@ -25,18 +24,14 @@ struct Config {
 
 #[tokio::main]
 async fn main() -> Result<()> {
-    // Set RUST_LOG if not already set
-    match std::env::var("RUST_LOG") {
-        Ok(_) => {}
-        Err(_) => unsafe {
-            std::env::set_var("RUST_LOG", "info");
-        },
-    };
     env_logger::init();
 
     let cfg = Config::parse();
 
     let firewall_rules: firewall::rules::RuleSet = confy::load("firewall-rs", "firewall-rules")?;
+
+    debug!("Using following rules {}", firewall_rules);
+
     let local_data_dir = dirs::data_local_dir().unwrap();
 
     let phy_interfaces = datalink::interfaces();
@@ -50,6 +45,8 @@ async fn main() -> Result<()> {
         Some(interface) => {
             let mut engine =
                 firewall::engine::FirewallEngine::new(interface.name.clone(), firewall_rules);
+
+            engine.run().await;
         }
         None => {
             error!("[-] Interface not found");

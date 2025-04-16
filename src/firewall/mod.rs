@@ -1,4 +1,4 @@
 pub mod engine;
 mod interface;
-mod nft;
+mod nftables;
 pub mod rules;
