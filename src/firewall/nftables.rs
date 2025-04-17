@@ -1,16 +1,10 @@
-use super::rules::{Rule as FirewallRule, RuleSet};
+use super::rules::RuleSet;
 use crate::{debug, error, log};
 use anyhow::Result;
-use nfq::Queue;
 use nix::libc::{self};
-use nix::sys::socket::{self, AddressFamily, SockFlag, SockProtocol, SockType};
 use rustables::{
-    Batch, Chain, ChainPolicy, ChainPriority, ChainType, Hook, HookClass, ProtocolFamily, Rule,
-    Table,
+    Batch, Chain, ChainPolicy, ChainType, Hook, HookClass, ProtocolFamily, Rule, Table,
 };
-use serde::de;
-use std::fmt::Debug;
-use std::{ffi::CString, io};
 
 const CHAIN_NAME: &str = "some-chain-name";
 const ALLOW_NAME: &str = "allow-name";
@@ -116,6 +110,24 @@ pub fn create_new_table(table_name: &str, rules: RuleSet) -> Result<()> {
         }
     }
 
+    if !rules.allow.source_networks.is_empty() {
+        for src_network in rules.allow.source_networks {
+            Rule::new(&allow_chain)?
+                .match_network(src_network, true)?
+                .accept()
+                .add_to_batch(&mut batch);
+        }
+    }
+
+    if !rules.allow.destination_networks.is_empty() {
+        for dst_network in rules.allow.destination_networks {
+            Rule::new(&allow_chain)?
+                .match_network(dst_network, false)?
+                .accept()
+                .add_to_batch(&mut batch);
+        }
+    }
+
     if !rules.allow.dports.is_empty() {
         for dport in rules.allow.dports {
             Rule::new(&allow_chain)?
@@ -158,6 +170,24 @@ pub fn create_new_table(table_name: &str, rules: RuleSet) -> Result<()> {
         for dst_addr in rules.deny.destinations {
             Rule::new(&deny_chain)?
                 .daddr(dst_addr)
+                .drop()
+                .add_to_batch(&mut batch);
+        }
+    }
+
+    if !rules.deny.source_networks.is_empty() {
+        for src_network in rules.deny.source_networks {
+            Rule::new(&deny_chain)?
+                .match_network(src_network, true)?
+                .drop()
+                .add_to_batch(&mut batch);
+        }
+    }
+
+    if !rules.deny.destination_networks.is_empty() {
+        for dst_network in rules.deny.destination_networks {
+            Rule::new(&deny_chain)?
+                .match_network(dst_network, false)?
                 .drop()
                 .add_to_batch(&mut batch);
         }
@@ -210,6 +240,24 @@ pub fn create_new_table(table_name: &str, rules: RuleSet) -> Result<()> {
                 .with_expr(rustables::expr::Immediate::new_verdict(
                     rustables::expr::VerdictKind::Queue,
                 ))
+                .add_to_batch(&mut batch);
+        }
+    }
+
+    if !rules.log.source_networks.is_empty() {
+        for src_network in rules.log.source_networks {
+            Rule::new(&log_chain)?
+                .match_network(src_network, true)?
+                .accept()
+                .add_to_batch(&mut batch);
+        }
+    }
+
+    if !rules.log.destination_networks.is_empty() {
+        for dst_network in rules.log.destination_networks {
+            Rule::new(&log_chain)?
+                .match_network(dst_network, false)?
+                .accept()
                 .add_to_batch(&mut batch);
         }
     }

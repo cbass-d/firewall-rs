@@ -1,8 +1,8 @@
 use core::net::IpAddr;
+use pnet::ipnetwork::IpNetwork;
 use serde::{Deserialize, Serialize};
 use std::collections::HashSet;
 use std::fmt;
-use std::path::Path;
 
 #[derive(Deserialize, Debug)]
 pub enum Action {
@@ -15,6 +15,8 @@ pub enum Action {
 pub struct Rule {
     pub sources: HashSet<IpAddr>,
     pub destinations: HashSet<IpAddr>,
+    pub source_networks: HashSet<IpNetwork>,
+    pub destination_networks: HashSet<IpNetwork>,
     pub dports: HashSet<u16>,
     pub sports: HashSet<u16>,
 }
@@ -29,8 +31,13 @@ impl fmt::Display for Rule {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(
             f,
-            "sources: {:?}\ndestinations: {:?}",
-            self.sources, self.destinations
+            "sources: {:?}\ndestinations: {:?}\nsource networks: {:?}\ndestination networks: {:?}\nsports: {:?}\ndports: {:?}",
+            self.sources,
+            self.destinations,
+            self.source_networks,
+            self.destination_networks,
+            self.sports,
+            self.dports
         )
     }
 }
