@@ -1,7 +1,6 @@
 use super::rules::RuleSet;
 use crate::{debug, error, log};
 use anyhow::Result;
-use nix::libc::{self};
 use rustables::{
     Batch, Chain, ChainPolicy, ChainType, Hook, HookClass, ProtocolFamily, Rule, Table,
 };
