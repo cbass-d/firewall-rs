@@ -45,12 +45,13 @@ impl FirewallEngine {
         })
     }
 
-    pub async fn run(&mut self) {
+    pub async fn run(&mut self) -> Result<()> {
         info!("Engine is running");
 
         let run = Arc::new(AtomicBool::new(true));
         let handler_run = run.clone();
 
+        // ctlr-c signal stops the running of engine
         ctrlc::set_handler(move || {
             handler_run.store(false, Ordering::SeqCst);
         });
@@ -61,7 +62,7 @@ impl FirewallEngine {
                 Err(e) if e.kind() == std::io::ErrorKind::WouldBlock => continue,
                 Err(e) => {
                     error!("{e}");
-                    break;
+                    return Err(anyhow!(e));
                 }
             };
 
@@ -69,14 +70,18 @@ impl FirewallEngine {
 
             match eth_type {
                 EtherTypes::Ipv4 => {
-                    let packet = Ipv4Packet::new(msg.get_payload()).unwrap();
-
-                    self.handle_ipv4(&packet).map_err(|err| error!("{err}"));
+                    if let Some(packet) = Ipv4Packet::new(msg.get_payload()) {
+                        self.handle_ipv4(&packet).map_err(|err| error!("{err}"));
+                    } else {
+                        debug!("Invalid IPv4 packet received");
+                    }
                 }
                 EtherTypes::Ipv6 => {
-                    let packet = Ipv6Packet::new(msg.get_payload()).unwrap();
-
-                    self.handle_ipv6(&packet).map_err(|err| error!("{err}"));
+                    if let Some(packet) = Ipv6Packet::new(msg.get_payload()) {
+                        self.handle_ipv6(&packet).map_err(|err| error!("{err}"));
+                    } else {
+                        debug!("Invalid IPv6 packet received");
+                    }
                 }
                 _ => {
                     debug!("Unhandled etherlink protocol");
@@ -89,28 +94,39 @@ impl FirewallEngine {
         self.log.write_to_file();
 
         println!("Log file written to: {}", self.log.get_file_path());
+
+        Ok(())
     }
 
     pub fn display_rules(&self) {
         println!("{}", self.rules);
     }
 
-    pub fn handle_ipv4(&mut self, ipv4_packet: &Ipv4Packet) -> Result<()> {
-        let source = IpAddr::from(ipv4_packet.get_source());
-        let destination = IpAddr::from(ipv4_packet.get_destination());
+    pub fn handle_ipv4(&mut self, packet: &Ipv4Packet) -> Result<()> {
+        let source = IpAddr::from(packet.get_source());
+        let destination = IpAddr::from(packet.get_destination());
 
         self.log.add(
-            "ipv4",
-            IpAddr::V4(ipv4_packet.get_source()),
-            IpAddr::V4(ipv4_packet.get_destination()),
+            "IPv4",
+            IpAddr::V4(packet.get_source()),
+            IpAddr::V4(packet.get_destination()),
             Utc::now(),
         );
 
         Ok(())
     }
 
-    pub fn handle_ipv6(&self, packet: &Ipv6Packet) -> Result<()> {
-        println!("6");
+    pub fn handle_ipv6(&mut self, packet: &Ipv6Packet) -> Result<()> {
+        let source = IpAddr::from(packet.get_source());
+        let destination = IpAddr::from(packet.get_destination());
+
+        self.log.add(
+            "IPv6",
+            IpAddr::V6(packet.get_source()),
+            IpAddr::V6(packet.get_destination()),
+            Utc::now(),
+        );
+
         Ok(())
     }
 

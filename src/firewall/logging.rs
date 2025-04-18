@@ -80,7 +80,9 @@ impl Log {
     }
 
     pub fn get_file_path(&self) -> &str {
-        self.file_path.to_str().unwrap()
+        self.file_path
+            .to_str()
+            .expect("Invalid unicode in file path")
     }
 
     pub fn write_to_file(&mut self) -> Result<(), io::Error> {
@@ -90,7 +92,7 @@ impl Log {
             .open(self.file_path.clone())?;
 
         while !self.entries.is_empty() {
-            let entry = self.entries.pop_front().unwrap();
+            let entry = self.entries.pop_front().expect("pop called on empy queue");
             write!(&mut file, "{}\n", entry);
         }
 
