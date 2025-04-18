@@ -44,9 +44,7 @@ pub struct Log {
 impl Log {
     pub fn new() -> Self {
         let log_uuid: u32 = random();
-        let mut file_path = PathBuf::new();
-        file_path.push(dirs::data_local_dir().unwrap());
-        file_path.push("firewall-rs/");
+        let mut file_path = choose_file_path();
         file_path.push(format!("firewall.log-{log_uuid}"));
 
         Self {
@@ -75,7 +73,7 @@ impl Log {
         self.next_id += 1;
 
         if self.entries.len() > 5 {
-            self.write_to_file();
+            self.write_to_file().expect("some bad");
         }
     }
 
@@ -92,7 +90,7 @@ impl Log {
             .open(self.file_path.clone())?;
 
         while !self.entries.is_empty() {
-            let entry = self.entries.pop_front().expect("pop called on empy queue");
+            let entry = self.entries.pop_front().expect("pop called on empty queue");
             write!(&mut file, "{}\n", entry);
         }
 
@@ -107,5 +105,12 @@ impl fmt::Display for LogEntry {
             "id: {}\nprotocol: {}\nsource: {}\ndestination: {}\ntime: {}",
             self.id, self.protocol, self.source, self.destination, self.time
         )
+    }
+}
+
+pub fn choose_file_path() -> PathBuf {
+    #[cfg(target_os = "linux")]
+    {
+        PathBuf::from("/var/log/")
     }
 }

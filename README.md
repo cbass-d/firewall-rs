@@ -1,4 +1,4 @@
-### Firewall written in Rust
+### Firewall-thing written in Rust
 
 To build from root directory:
 ```
@@ -6,34 +6,13 @@ $ cargo build
 ```
 
 Binary must be ran using root/administrator privilages
-(needed for listening on network interfaces)
+Calls to the netlink subsystem are made to create nftables
 
 ```
-Usage: firewall-rs -i <INTERFACE>
+Usage: firewall-rs -r <RULES_FILE>
 
 Options:
-  -i <INTERFACE>      
+  -r <RULES_FILE>      
   -h, --help          Print help
-```
 
-### Defining firewall rules
-This project uses the confy crate for handling loading of configuration file
-Linux
-* Rules are defined in: /root/.config/firewall-rs/firewall-rules.toml
-
-Windows and MacOs - TODO
-
-Example firewall-rules.toml:
-```
-[allow]
-sources =  []
-destinations = []
-
-[deny]
-sources =  ["xxx.xxx.xxx.xxx", "yyy.yyy.yyy"]
-destinations = []
-
-[log]
-sources =  ["zzz.zzz.zzz.zzz", "yyy.yyy.yyy"]
-destinations = []
 ```

@@ -91,7 +91,7 @@ impl FirewallEngine {
             debug!("Received message");
         }
 
-        self.log.write_to_file();
+        self.log.write_to_file().expect("some bad");
 
         println!("Log file written to: {}", self.log.get_file_path());
 
