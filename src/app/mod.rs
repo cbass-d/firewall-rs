@@ -1,0 +1,93 @@
+use anyhow::{Result, anyhow};
+use controller::Action;
+use crossterm::{
+    event::{DisableMouseCapture, EnableMouseCapture, KeyEvent},
+    execute,
+    terminal::{EnterAlternateScreen, LeaveAlternateScreen, disable_raw_mode, enable_raw_mode},
+};
+use futures::{FutureExt, StreamExt};
+use log::debug;
+use ratatui::prelude::*;
+use std::io::{self, Stdout};
+use std::{fs::read, time::Duration};
+use tokio::sync::mpsc::{self};
+
+pub mod app;
+pub mod app_router;
+pub mod components;
+pub mod controller;
+
+#[derive(Clone, Copy)]
+pub enum ActiveBox {
+    RulesList,
+}
+
+pub struct UserInterface {
+    pub action_tx: mpsc::UnboundedSender<Action>,
+}
+
+pub enum Event {
+    Error,
+    Tick,
+    Key(KeyEvent),
+}
+
+pub struct EventHandler {
+    _tx: mpsc::UnboundedSender<Event>,
+    rx: mpsc::UnboundedReceiver<Event>,
+}
+
+impl EventHandler {
+    pub fn new() -> Self {
+        let tick_rate = Duration::from_millis(1000);
+
+        let (tx, rx) = mpsc::unbounded_channel();
+        let _tx = tx.clone();
+
+        let _task = tokio::spawn(async move {
+            let mut reader = crossterm::event::EventStream::new();
+            let mut interval = tokio::time::interval(tick_rate);
+
+            loop {
+                let delay = interval.tick();
+                let crossterm_event = reader.next().fuse();
+
+                tokio::select! {
+                    maybe_event = crossterm_event => {
+                        match maybe_event {
+                            Some(Ok(event)) => {
+                                if let crossterm::event::Event::Key(key) = event {
+                                        let res = tx.send(Event::Key(key));
+                                        debug!("sending: {:?}", key);
+                                        debug!("{:?}", res);
+                                }
+                            },
+                            Some(Err(_)) => {
+                                tx.send(Event::Error).unwrap();
+                            },
+                            None => {},
+                        }
+                    },
+                    _ = delay => {
+                        tx.send(Event::Tick).unwrap();
+                    }
+                }
+            }
+        });
+
+        Self { _tx, rx }
+    }
+
+    pub async fn next(&mut self) -> Result<Event> {
+        self.rx.recv().await.ok_or(anyhow!("Unable to get event"))
+    }
+}
+
+impl UserInterface {
+    pub fn new() -> (Self, mpsc::UnboundedReceiver<Action>, EventHandler) {
+        let (action_tx, action_rx) = mpsc::unbounded_channel();
+        let event_handler = EventHandler::new();
+
+        (Self { action_tx }, action_rx, event_handler)
+    }
+}

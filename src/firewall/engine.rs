@@ -27,9 +27,11 @@ impl FirewallEngine {
         let mut nf_queue = Queue::open()?;
         nf_queue.set_nonblocking(true);
         nf_queue.bind(0)?;
+        debug!("New netfilter queue created");
+
         match nftables::create_new_table("bleh", rules.clone()) {
             Ok(()) => {
-                println!("bleh");
+                debug!("New table created");
             }
             Err(e) => {
                 println!("{}", e);

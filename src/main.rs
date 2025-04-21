@@ -8,6 +8,9 @@ use tokio::sync::broadcast::{self};
 
 use firewall::engine::FirewallEngine;
 
+mod app;
+mod cli;
+mod display;
 mod firewall;
 
 #[derive(Parser, Serialize, Deserialize)]
@@ -20,20 +23,12 @@ struct Config {
 async fn main() -> Result<()> {
     env_logger::init();
 
-    let cli_cfg = Config::parse();
-
-    let firewall_rules: RuleSet = confy::load_path(cli_cfg.rules_file)?;
-
-    debug!("Using following rules {}", firewall_rules);
-
-    let mut engine = match FirewallEngine::new(firewall_rules) {
-        Ok(engine) => engine,
+    match cli::run().await {
+        Ok(()) => {}
         Err(e) => {
-            return Err(e);
+            return Err(anyhow!("Error running app: {e}"));
         }
     };
-
-    engine.run().await;
 
     Ok(())
 }
