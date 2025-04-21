@@ -4,8 +4,10 @@ use crossterm::event::KeyEvent;
 use ratatui::{Frame, layout::Rect, style::Color};
 use tokio::sync::mpsc::{self};
 
+mod animation;
 mod footer;
 pub mod main_page;
+mod packet_log;
 mod rules_list;
 
 pub struct Props {

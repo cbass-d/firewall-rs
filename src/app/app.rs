@@ -52,6 +52,7 @@ impl App {
                         },
                         Ok(Event::Error) => {},
                         Ok(Event::Tick) => {
+                            app_router = app_router.update(&self.context);
                         },
                         Err(_) => {},
                     }
