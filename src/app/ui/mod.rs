@@ -1,4 +1,5 @@
 use super::EventHandler;
+use crate::firewall::rules::FirewallAction;
 use tokio::sync::mpsc::{self};
 
 #[derive(Clone, Copy, Debug)]
@@ -7,6 +8,8 @@ pub enum Action {
     Return,
     SelectRulesList,
     SelectPacketLog,
+    DisplayHelp,
+    EditRules(FirewallAction),
 }
 
 pub struct UserInterface {

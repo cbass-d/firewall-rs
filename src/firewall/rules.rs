@@ -5,7 +5,7 @@ use std::collections::HashSet;
 use std::fmt;
 
 #[derive(Deserialize, Debug, Clone, Copy)]
-pub enum Action {
+pub enum FirewallAction {
     Allow,
     Deny,
     Log,

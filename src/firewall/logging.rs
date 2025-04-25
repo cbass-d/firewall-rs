@@ -11,13 +11,13 @@ use std::{
 };
 use tokio::sync::broadcast::{self};
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct LogEntry {
-    id: u64,
-    protocol: String,
-    source: IpAddr,
-    destination: IpAddr,
-    time: DateTime<Utc>,
+    pub id: u64,
+    pub protocol: String,
+    pub source: IpAddr,
+    pub destination: IpAddr,
+    pub time: DateTime<Utc>,
 }
 
 impl LogEntry {

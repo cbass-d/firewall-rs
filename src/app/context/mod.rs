@@ -1,4 +1,4 @@
-use crate::firewall::rules::RuleSet;
+use crate::firewall::{logging::LogEntry, rules::RuleSet};
 use std::collections::VecDeque;
 
 use super::ActiveBox;
@@ -6,7 +6,7 @@ use super::ActiveBox;
 #[derive(Debug)]
 pub struct AppContext {
     pub ruleset: RuleSet,
-    pub packet_log: VecDeque<String>,
+    pub packet_log: VecDeque<LogEntry>,
     pub active_box: ActiveBox,
 }
 

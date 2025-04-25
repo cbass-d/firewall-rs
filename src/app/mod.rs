@@ -34,6 +34,8 @@ pub enum ActiveBox {
     None,
     RulesList,
     PacketLog,
+    HelpPage,
+    EditPage,
 }
 
 pub struct App {
@@ -94,6 +96,10 @@ impl App {
                             context.active_box = ActiveBox::None;
                             app_router = app_router.update(&context);
                         },
+                        Some(Action::DisplayHelp) => {
+                            context.active_box = ActiveBox::HelpPage;
+                            app_router = app_router.update(&context);
+                        },
                         Some(Action::SelectRulesList) => {
                             context.active_box = ActiveBox::RulesList;
                             app_router = app_router.update(&context);
@@ -102,6 +108,9 @@ impl App {
                             context.active_box = ActiveBox::PacketLog;
                             app_router = app_router.update(&context);
                         },
+                        Some(Action::EditRules(set)) => {
+                            context.active_box = ActiveBox::EditPage;
+                        },
                         None => {},
                     }
 
@@ -109,7 +118,7 @@ impl App {
                 log_entry = self.logs_rx.recv() => {
                     match log_entry {
                         Ok(entry) => {
-                            context.packet_log.push_back(format!("{}", entry));
+                            context.packet_log.push_back(entry);
                             app_router = app_router.update(&context);
 
                             debug!("Adding new entry to UI packet log");
