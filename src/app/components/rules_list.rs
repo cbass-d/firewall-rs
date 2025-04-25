@@ -1,20 +1,12 @@
-use crossterm::event::KeyCode;
-use ratatui::style::Color;
-use ratatui::style::Style;
-use ratatui::text::Text;
-use ratatui::widgets::Block;
-use ratatui::widgets::List;
-use ratatui::widgets::ListDirection;
-use ratatui::widgets::ListState;
-use ratatui::widgets::Padding;
-use ratatui::widgets::Paragraph;
-
-use super::Action;
-use super::AppContext;
-use super::KeyEvent;
-use super::mpsc;
-use super::{Component, ComponentRender, Props};
+use super::{Action, AppContext, Component, ComponentRender, Props};
 use crate::firewall::rules::RuleSet;
+use crossterm::event::{KeyCode, KeyEvent};
+use ratatui::{
+    style::{Color, Style},
+    text::Text,
+    widgets::{Block, Borders, List, ListDirection, ListState, Padding, Paragraph},
+};
+use tokio::sync::mpsc::{self};
 
 pub struct RulesList {
     active_rules: RuleSet,
@@ -48,7 +40,7 @@ impl Component for RulesList {
     fn handle_key_event(&mut self, key: KeyEvent) {
         match key.code {
             KeyCode::Esc => {
-                let _ = self.action_tx.send(Action::Quit);
+                let _ = self.action_tx.send(Action::Return);
             }
             KeyCode::Down => {
                 self.list_state.select_next();
@@ -63,8 +55,10 @@ impl Component for RulesList {
 
 impl ComponentRender<Props> for RulesList {
     fn render(&mut self, frame: &mut ratatui::Frame, props: Props) {
-        let block = Block::bordered()
+        let block = Block::new()
             .title("Active Firewall Rules")
+            .borders(Borders::all())
+            .border_style(props.border_color)
             .padding(Padding::uniform(1));
 
         let mut items = Vec::new();

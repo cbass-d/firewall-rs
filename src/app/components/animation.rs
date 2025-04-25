@@ -1,14 +1,9 @@
 use crossterm::event::KeyEvent;
 use rand::Rng;
-use ratatui::widgets::Block;
-use ratatui::widgets::Borders;
-use ratatui::widgets::Padding;
-use ratatui::widgets::Paragraph;
+use ratatui::widgets::{Block, Borders, Padding, Paragraph};
 
-use super::Action;
-use super::AppContext;
-use super::mpsc;
-use super::{Component, ComponentRender, Props};
+use super::{Action, AppContext, Component, ComponentRender, Props};
+use tokio::sync::mpsc::{self};
 
 const FRAMES: &[&str] = &[
     r#"     +---+---+---+---+---+---+---+   

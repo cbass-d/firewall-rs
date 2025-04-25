@@ -1,93 +1,127 @@
-use anyhow::{Result, anyhow};
-use controller::Action;
-use crossterm::{
-    event::{DisableMouseCapture, EnableMouseCapture, KeyEvent},
-    execute,
-    terminal::{EnterAlternateScreen, LeaveAlternateScreen, disable_raw_mode, enable_raw_mode},
+use self::{
+    app_router::AppRouter,
+    components::{Component, ComponentRender},
+    context::AppContext,
+    event_handler::{Event, EventHandler},
+    ui::{Action, UserInterface},
 };
-use futures::{FutureExt, StreamExt};
-use log::debug;
-use ratatui::prelude::*;
-use std::io::{self, Stdout};
-use std::{fs::read, time::Duration};
-use tokio::sync::mpsc::{self};
+use crate::{
+    display,
+    firewall::{engine::FirewallEngine, logging::LogEntry},
+};
+use anyhow::{Result, anyhow};
+use cli_log::{debug, error, log};
+use crossterm::event::KeyCode;
+use serde::de;
+use std::{
+    fmt::format,
+    sync::{Arc, Mutex},
+    time::Duration,
+};
+use tokio::sync::{
+    broadcast::{self},
+    mpsc::{self},
+};
 
-pub mod app;
-pub mod app_router;
-pub mod components;
-pub mod controller;
+mod app_router;
+mod components;
+pub mod context;
+mod event_handler;
+mod ui;
 
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, PartialEq, Debug)]
 pub enum ActiveBox {
+    None,
     RulesList,
+    PacketLog,
 }
 
-pub struct UserInterface {
-    pub action_tx: mpsc::UnboundedSender<Action>,
+pub struct App {
+    quit: bool,
+    ui: UserInterface,
+    action_rx: mpsc::UnboundedReceiver<Action>,
+    event_handler: EventHandler,
+    logs_rx: broadcast::Receiver<LogEntry>,
 }
 
-pub enum Event {
-    Error,
-    Tick,
-    Key(KeyEvent),
-}
+impl App {
+    pub fn new(logs_rx: broadcast::Receiver<LogEntry>) -> Result<Self> {
+        let (ui, mut action_rx, mut event_handler) = UserInterface::new();
 
-pub struct EventHandler {
-    _tx: mpsc::UnboundedSender<Event>,
-    rx: mpsc::UnboundedReceiver<Event>,
-}
+        Ok(Self {
+            quit: false,
+            ui,
+            action_rx,
+            event_handler,
+            logs_rx,
+        })
+    }
 
-impl EventHandler {
-    pub fn new() -> Self {
-        let tick_rate = Duration::from_millis(1000);
+    pub async fn run(&mut self, mut context: AppContext) -> Result<()> {
+        debug!("Running app");
 
-        let (tx, rx) = mpsc::unbounded_channel();
-        let _tx = tx.clone();
+        let mut app_router = AppRouter::new(&context, self.ui.action_tx.clone());
+        let mut terminal = display::setup_terminal();
+        terminal.clear();
 
-        let _task = tokio::spawn(async move {
-            let mut reader = crossterm::event::EventStream::new();
-            let mut interval = tokio::time::interval(tick_rate);
-
-            loop {
-                let delay = interval.tick();
-                let crossterm_event = reader.next().fuse();
-
-                tokio::select! {
-                    maybe_event = crossterm_event => {
-                        match maybe_event {
-                            Some(Ok(event)) => {
-                                if let crossterm::event::Event::Key(key) = event {
-                                        let res = tx.send(Event::Key(key));
-                                        debug!("sending: {:?}", key);
-                                        debug!("{:?}", res);
-                                }
-                            },
-                            Some(Err(_)) => {
-                                tx.send(Event::Error).unwrap();
-                            },
-                            None => {},
-                        }
-                    },
-                    _ = delay => {
-                        tx.send(Event::Tick).unwrap();
-                    }
-                }
+        loop {
+            if self.quit {
+                display::teardown_terminal(&mut terminal);
+                break;
             }
-        });
 
-        Self { _tx, rx }
-    }
+            tokio::select! {
+                kb_event = self.event_handler.next() => {
+                    match kb_event {
+                        Ok(Event::Key(key)) => {
+                            app_router.handle_key_event(key);
+                        },
+                        Ok(Event::Error) => {},
+                        Ok(Event::Tick) => {
+                            app_router = app_router.update(&context);
+                        },
+                        Err(_) => {},
+                    }
+                },
+                app_event = self.action_rx.recv() => {
+                    match app_event {
+                        Some(Action::Quit) => {
+                            self.quit = true;
 
-    pub async fn next(&mut self) -> Result<Event> {
-        self.rx.recv().await.ok_or(anyhow!("Unable to get event"))
-    }
-}
+                            debug!("Quitting app");
+                        },
+                        Some(Action::Return) => {
+                            context.active_box = ActiveBox::None;
+                            app_router = app_router.update(&context);
+                        },
+                        Some(Action::SelectRulesList) => {
+                            context.active_box = ActiveBox::RulesList;
+                            app_router = app_router.update(&context);
+                        },
+                        Some(Action::SelectPacketLog) => {
+                            context.active_box = ActiveBox::PacketLog;
+                            app_router = app_router.update(&context);
+                        },
+                        None => {},
+                    }
 
-impl UserInterface {
-    pub fn new() -> (Self, mpsc::UnboundedReceiver<Action>, EventHandler) {
-        let (action_tx, action_rx) = mpsc::unbounded_channel();
-        let event_handler = EventHandler::new();
+                },
+                log_entry = self.logs_rx.recv() => {
+                    match log_entry {
+                        Ok(entry) => {
+                            context.packet_log.push_back(format!("{}", entry));
+                            app_router = app_router.update(&context);
 
-        (Self { action_tx }, action_rx, event_handler)
+                            debug!("Adding new entry to UI packet log");
+                        },
+                        Err(_) => {},
+                    }
+                },
+            }
+
+            let _ = terminal.draw(|f| app_router.render(f, ()));
+        }
+
+        Ok(())
     }
 }

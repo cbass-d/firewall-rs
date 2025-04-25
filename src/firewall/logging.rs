@@ -3,12 +3,15 @@ use core::net::IpAddr;
 use dirs::data_local_dir;
 use rand::random;
 use std::collections::VecDeque;
-use std::fmt;
-use std::fs::File;
-use std::io;
-use std::io::Write;
-use std::path::PathBuf;
+use std::{
+    fmt,
+    fs::File,
+    io::{self, Write},
+    path::PathBuf,
+};
+use tokio::sync::broadcast::{self};
 
+#[derive(Clone)]
 pub struct LogEntry {
     id: u64,
     protocol: String,
@@ -39,19 +42,28 @@ pub struct Log {
     entries: VecDeque<LogEntry>,
     next_id: u64,
     file_path: PathBuf,
+    tx: broadcast::Sender<LogEntry>,
 }
 
 impl Log {
-    pub fn new() -> Self {
+    pub fn new() -> (Self, broadcast::Receiver<LogEntry>) {
         let log_uuid: u32 = random();
         let mut file_path = choose_file_path();
         file_path.push(format!("firewall.log-{log_uuid}"));
 
-        Self {
-            entries: VecDeque::new(),
-            next_id: 1,
-            file_path,
-        }
+        // Create broadcast channel for sending new log entries
+        // to other modules
+        let (tx, rx) = broadcast::channel::<LogEntry>(1);
+
+        (
+            Self {
+                entries: VecDeque::new(),
+                next_id: 1,
+                file_path,
+                tx,
+            },
+            rx,
+        )
     }
 
     pub fn add(
@@ -68,7 +80,9 @@ impl Log {
             destination,
             time,
         };
-        self.entries.push_back(entry);
+        self.entries.push_back(entry.clone());
+
+        let _ = self.tx.send(entry);
 
         self.next_id += 1;
 

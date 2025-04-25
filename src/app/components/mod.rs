@@ -1,17 +1,15 @@
-use crate::app::controller::Action;
-use crate::app::controller::context::AppContext;
+use super::{Action, context::AppContext};
 use crossterm::event::KeyEvent;
 use ratatui::{Frame, layout::Rect, style::Color};
 use tokio::sync::mpsc::{self};
 
-mod animation;
-mod footer;
-pub mod main_page;
-mod packet_log;
-mod rules_list;
+pub mod animation;
+pub mod packet_log;
+pub mod rules_list;
 
 pub struct Props {
     pub area: Rect,
+    pub border_color: Color,
 }
 
 pub trait Component {

@@ -1,6 +1,6 @@
 use super::rules::RuleSet;
-use crate::{debug, error, log};
 use anyhow::Result;
+use cli_log::debug;
 use rustables::{
     Batch, Chain, ChainPolicy, ChainType, Hook, HookClass, ProtocolFamily, Rule, Table,
 };

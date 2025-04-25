@@ -1,17 +1,23 @@
-use super::logging::{Log, LogEntry};
-use super::nftables;
-use super::rules::RuleSet;
+use super::{
+    logging::{Log, LogEntry},
+    nftables::{self},
+    rules::RuleSet,
+};
 use anyhow::{Result, anyhow};
 use chrono::{DateTime, Utc};
+use cli_log::{debug, error, info, log};
 use core::net::IpAddr;
-use log::{debug, error, info};
 use nfq::Queue;
-use pnet::packet::Packet;
-use pnet::packet::ethernet::{EtherType, EtherTypes, EthernetPacket};
-use pnet::packet::ipv4::Ipv4Packet;
-use pnet::packet::ipv6::Ipv6Packet;
-use std::sync::Arc;
-use std::sync::atomic::{AtomicBool, Ordering};
+use pnet::packet::{
+    Packet,
+    ethernet::{EtherType, EtherTypes, EthernetPacket},
+    ipv4::Ipv4Packet,
+    ipv6::Ipv6Packet,
+};
+use std::sync::{
+    Arc,
+    atomic::{AtomicBool, Ordering},
+};
 use tokio::sync::broadcast::{self};
 
 pub struct FirewallEngine {
@@ -21,7 +27,7 @@ pub struct FirewallEngine {
 }
 
 impl FirewallEngine {
-    pub fn new(rules: RuleSet) -> Result<Self> {
+    pub fn new(rules: RuleSet) -> Result<(Self, broadcast::Receiver<LogEntry>)> {
         debug!("Creating new firewall engine");
 
         let mut nf_queue = Queue::open()?;
@@ -38,27 +44,30 @@ impl FirewallEngine {
             }
         }
 
-        let log = Log::new();
+        let (log, logs_rx) = Log::new();
 
-        Ok(Self {
-            rules,
-            nf_queue,
-            log,
-        })
+        Ok((
+            Self {
+                rules,
+                nf_queue,
+                log,
+            },
+            logs_rx,
+        ))
     }
 
-    pub async fn run(&mut self) -> Result<()> {
+    pub fn run(&mut self, mut shutdown_rx: broadcast::Receiver<()>) -> Result<()> {
         info!("Engine is running");
 
-        let run = Arc::new(AtomicBool::new(true));
-        let handler_run = run.clone();
+        loop {
+            // Break loop when shutdown signal is received
+            match shutdown_rx.try_recv() {
+                Ok(_) => {
+                    break;
+                }
+                Err(_) => {}
+            }
 
-        // ctlr-c signal stops the running of engine
-        ctrlc::set_handler(move || {
-            handler_run.store(false, Ordering::SeqCst);
-        });
-
-        while run.load(Ordering::SeqCst) {
             let mut msg = match self.nf_queue.recv() {
                 Ok(msg) => msg,
                 Err(e) if e.kind() == std::io::ErrorKind::WouldBlock => continue,
@@ -93,7 +102,7 @@ impl FirewallEngine {
             debug!("Received message");
         }
 
-        self.log.write_to_file().expect("some bad");
+        self.log.write_to_file().expect("Failed to write log file");
 
         println!("Log file written to: {}", self.log.get_file_path());
 

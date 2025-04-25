@@ -1,4 +1,4 @@
 pub mod engine;
-mod logging;
+pub mod logging;
 mod nftables;
 pub mod rules;

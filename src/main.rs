@@ -1,17 +1,10 @@
 use anyhow::{Result, anyhow};
 use clap::Parser;
-use firewall::rules::RuleSet;
-use log::{debug, error, info, log};
+use cli_log::*;
+use firewall_rs::cli;
 use pnet::datalink::{self};
 use serde::{Deserialize, Serialize};
 use tokio::sync::broadcast::{self};
-
-use firewall::engine::FirewallEngine;
-
-mod app;
-mod cli;
-mod display;
-mod firewall;
 
 #[derive(Parser, Serialize, Deserialize)]
 struct Config {
@@ -21,14 +14,20 @@ struct Config {
 
 #[tokio::main]
 async fn main() -> Result<()> {
-    env_logger::init();
+    init_cli_log!();
+    debug!("Starting CLI");
 
     match cli::run().await {
-        Ok(()) => {}
+        Ok(()) => {
+            debug!("CLI exited");
+        }
         Err(e) => {
+            error!("Error running CLI: {e}");
             return Err(anyhow!("Error running app: {e}"));
         }
     };
+
+    log_mem(Level::Info);
 
     Ok(())
 }
