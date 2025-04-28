@@ -24,14 +24,6 @@ pub struct PacketLog {
     table_state: TableState,
 }
 
-struct TableEntry {
-    id: u32,
-    protocol: String,
-    source: IpAddr,
-    destination: IpAddr,
-    time: DateTime<Utc>,
-}
-
 impl Component for PacketLog {
     fn new(context: &AppContext, action_tx: mpsc::UnboundedSender<Action>) -> Self
     where

@@ -7,7 +7,7 @@ use self::{
 };
 use crate::{
     display,
-    firewall::{engine::FirewallEngine, logging::LogEntry},
+    firewall::{engine::FirewallEngine, logging::LogEntry, rules::FirewallAction},
 };
 use anyhow::{Result, anyhow};
 use cli_log::{debug, error, log};
@@ -108,8 +108,9 @@ impl App {
                             context.active_box = ActiveBox::PacketLog;
                             app_router = app_router.update(&context);
                         },
-                        Some(Action::EditRules(set)) => {
+                        Some(Action::EditRules) => {
                             context.active_box = ActiveBox::EditPage;
+                            app_router = app_router.update(&context);
                         },
                         None => {},
                     }

@@ -1,60 +1,56 @@
 use std::collections::HashSet;
 
 use super::{Action, AppContext, Component, ComponentRender, Props};
-use crate::firewall::rules::RuleSet;
+use crate::firewall::rules::{FirewallAction, Rule, RuleSet};
 use crate::format_rule_fields;
+use cli_log::debug;
 use crossterm::event::{KeyCode, KeyEvent};
+use ratatui::widgets::{Cell, Row};
 use ratatui::{
     prelude::*,
     style::{Color, Style},
     text::{Line, Text},
     widgets::{
         Block, Borders, HighlightSpacing, List, ListDirection, ListState, Padding, Paragraph,
+        Table, TableState, Tabs,
     },
 };
 use tokio::sync::mpsc::{self};
 
 pub struct RulesList {
     active_rules: RuleSet,
-    list_state: ListState,
-    allow_items: Vec<String>,
-    deny_items: Vec<String>,
-    log_items: Vec<String>,
     expanded: HashSet<usize>,
+    current_tab: usize,
     action_tx: mpsc::UnboundedSender<Action>,
 }
 
-impl RulesList {
-    fn expand_rules(&mut self, set: usize) {
-        match set {
-            0 => {
-                let mut new_items = format_rule_fields!(self, allow);
-                self.allow_items.append(&mut new_items);
-            }
-            1 => {
-                let mut new_items = format_rule_fields!(self, deny);
-                self.deny_items.append(&mut new_items);
-            }
-            2 => {
-                let mut new_items = format_rule_fields!(self, log);
-                self.log_items.append(&mut new_items);
-            }
-            _ => {}
-        }
+fn format_rule_set<T: std::fmt::Display>(set: &HashSet<T>) -> String {
+    if set.is_empty() {
+        return "Empty".to_string();
     }
 
-    fn collapse_rules(&mut self, set: usize) {
-        match set {
-            0 => {
-                self.allow_items = vec!["Allow".to_string()];
-            }
-            1 => {
-                self.deny_items = vec!["Deny".to_string()];
-            }
-            2 => {
-                self.log_items = vec!["Log".to_string()];
-            }
-            _ => {}
+    set.iter()
+        .map(|item| item.to_string())
+        .collect::<Vec<_>>()
+        .join(",")
+}
+
+impl RulesList {
+    fn next_tab(&mut self) {
+        self.current_tab = self.current_tab.saturating_add(1);
+        self.current_tab = self.current_tab.clamp(0, 2);
+    }
+
+    fn previous_tab(&mut self) {
+        self.current_tab = self.current_tab.saturating_sub(1);
+    }
+
+    fn get_current_rule_set(&self) -> &Rule {
+        match self.current_tab {
+            0 => &self.active_rules.allow,
+            1 => &self.active_rules.deny,
+            2 => &self.active_rules.log,
+            _ => &self.active_rules.log,
         }
     }
 }
@@ -66,10 +62,7 @@ impl Component for RulesList {
     {
         Self {
             active_rules: context.ruleset.clone(),
-            list_state: ListState::default(),
-            allow_items: vec!["Allow".to_string()],
-            deny_items: vec!["Deny".to_string()],
-            log_items: vec!["Log".to_string()],
+            current_tab: 0,
             expanded: HashSet::new(),
             action_tx,
         }
@@ -81,11 +74,8 @@ impl Component for RulesList {
     {
         Self {
             active_rules: context.ruleset.clone(),
-            list_state: self.list_state,
-            allow_items: self.allow_items,
-            deny_items: self.deny_items,
-            log_items: self.log_items,
             expanded: self.expanded,
+            current_tab: self.current_tab,
             action_tx: self.action_tx,
         }
     }
@@ -93,25 +83,17 @@ impl Component for RulesList {
     fn handle_key_event(&mut self, key: KeyEvent) {
         match key.code {
             KeyCode::Esc => {
-                self.list_state.select(None);
                 let _ = self.action_tx.send(Action::Return);
             }
-            KeyCode::Enter => {
-                if let Some(idx) = self.list_state.selected() {
-                    if self.expanded.contains(&idx) {
-                        self.collapse_rules(idx);
-                        self.expanded.remove(&idx);
-                    } else {
-                        self.expand_rules(idx);
-                        self.expanded.insert(idx);
-                    }
-                }
+            KeyCode::Enter => {}
+            KeyCode::Char('e') => {
+                let _ = self.action_tx.send(Action::EditRules);
             }
-            KeyCode::Down => {
-                self.list_state.select_next();
+            KeyCode::Left => {
+                self.previous_tab();
             }
-            KeyCode::Up => {
-                self.list_state.select_previous();
+            KeyCode::Right => {
+                self.next_tab();
             }
             _ => {}
         }
@@ -120,57 +102,58 @@ impl Component for RulesList {
 
 impl ComponentRender<Props> for RulesList {
     fn render(&mut self, frame: &mut ratatui::Frame, props: Props) {
-        let block = Block::new()
-            .title("Active Firewall Rules")
-            .borders(Borders::all())
-            .border_style(props.border_color)
-            .padding(Padding::uniform(1));
+        let layout = Layout::default()
+            .direction(Direction::Vertical)
+            .constraints([Constraint::Length(3), Constraint::Min(0)])
+            .split(props.area);
 
-        let allow_items: Vec<Line> = self
-            .allow_items
-            .clone()
-            .into_iter()
-            .map(|mut item| {
-                item.push_str("\n");
-                let line = Line::from(item).fg(Color::LightGreen);
-                line
-            })
+        let tabs = Tabs::new(vec!["Allow", "Log", "Deny"])
+            .block(
+                Block::default()
+                    .borders(Borders::all())
+                    .title("Active Firewall Rules"),
+            )
+            .highlight_style(
+                Style::default()
+                    .fg(Color::Black)
+                    .bg(Color::White)
+                    .add_modifier(Modifier::BOLD),
+            )
+            .select(self.current_tab);
+
+        debug!("current tab: {}", self.current_tab);
+
+        frame.render_widget(tabs, layout[0]);
+
+        let fields = [
+            "Source IPs",
+            "Destination Ips",
+            "Source Networks",
+            "Destination Networks",
+            "Source Ports",
+            "Destination Ports",
+        ];
+
+        let rule = self.get_current_rule_set();
+        let values = [
+            format_rule_set(&rule.sources),
+            format_rule_set(&rule.destinations),
+            format_rule_set(&rule.source_networks),
+            format_rule_set(&rule.destination_networks),
+            format_rule_set(&rule.sports),
+            format_rule_set(&rule.dports),
+        ];
+
+        let rows: Vec<Row> = fields
+            .iter()
+            .zip(values.iter())
+            .enumerate()
+            .map(|(i, (name, value))| Row::new(vec![Cell::from(*name), Cell::from(value.as_str())]))
             .collect();
 
-        let allow_items = Text::from(allow_items);
+        let table =
+            Table::new(rows, [Constraint::Min(0), Constraint::Min(0)]).block(Block::default());
 
-        let deny_items: Vec<Line> = self
-            .deny_items
-            .clone()
-            .into_iter()
-            .map(|mut item| {
-                item.push_str("\n");
-                let line = Line::from(item).fg(Color::Red);
-                line
-            })
-            .collect();
-
-        let deny_items = Text::from(deny_items);
-
-        let log_items: Vec<Line> = self
-            .log_items
-            .clone()
-            .into_iter()
-            .map(|mut item| {
-                item.push_str("\n");
-                let line = Line::from(item).fg(Color::LightYellow);
-                line
-            })
-            .collect();
-
-        let log_items = Text::from(log_items);
-
-        let list = List::new([allow_items, deny_items, log_items])
-            .direction(ListDirection::TopToBottom)
-            .highlight_spacing(HighlightSpacing::Always)
-            .highlight_symbol(">>")
-            .block(block);
-
-        frame.render_stateful_widget(list, props.area, &mut self.list_state);
+        frame.render_widget(table, layout[1]);
     }
 }

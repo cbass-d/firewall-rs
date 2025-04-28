@@ -9,7 +9,7 @@ pub enum Action {
     SelectRulesList,
     SelectPacketLog,
     DisplayHelp,
-    EditRules(FirewallAction),
+    EditRules,
 }
 
 pub struct UserInterface {

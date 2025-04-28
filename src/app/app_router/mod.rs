@@ -1,8 +1,8 @@
 use super::{
     ActiveBox,
     components::{
-        Component, ComponentRender, Props, animation::Animation, help_page::HelpPage,
-        packet_log::PacketLog, rules_list::RulesList,
+        Component, ComponentRender, Props, animation::Animation, edit_page::EditPage,
+        help_page::HelpPage, packet_log::PacketLog, rules_list::RulesList,
     },
     context::AppContext,
     ui::Action,
@@ -20,6 +20,7 @@ use tokio::sync::mpsc::{self};
 pub struct AppRouter {
     active_box: ActiveBox,
     rules_list: RulesList,
+    edit_page: EditPage,
     pub animation: Animation,
     packet_log: PacketLog,
     help_page: HelpPage,
@@ -36,6 +37,7 @@ impl Component for AppRouter {
             animation: Animation::new(context, action_tx.clone()),
             rules_list: RulesList::new(context, action_tx.clone()),
             packet_log: PacketLog::new(context, action_tx.clone()),
+            edit_page: EditPage::new(context, action_tx.clone()),
             help_page: HelpPage::new(context, action_tx.clone()),
             action_tx,
         }
@@ -52,6 +54,7 @@ impl Component for AppRouter {
             rules_list: self.rules_list.update(context),
             packet_log: self.packet_log.update(context),
             help_page: self.help_page.update(context),
+            edit_page: self.edit_page.update(context),
             action_tx: self.action_tx,
         }
     }
@@ -71,7 +74,9 @@ impl Component for AppRouter {
             ActiveBox::HelpPage => {
                 self.help_page.handle_key_event(key);
             }
-            ActiveBox::EditPage => todo!(),
+            ActiveBox::EditPage => {
+                self.edit_page.handle_key_event(key);
+            }
             ActiveBox::None => match key.code {
                 KeyCode::Esc => {
                     let _ = self.action_tx.send(Action::Quit);
@@ -119,6 +124,8 @@ impl ComponentRender<()> for AppRouter {
             }
             ActiveBox::RulesList => {
                 text.push_str(" esc - back ");
+                text.push_str(" enter - expand ");
+                text.push_str(" e - edit ");
                 text.push_str(" ? - help ");
             }
             ActiveBox::EditPage => {
@@ -163,17 +170,22 @@ impl ComponentRender<()> for AppRouter {
             .direction(Direction::Vertical)
             .split(nested_layout[1]);
 
-        self.rules_list.render(
-            frame,
-            Props {
-                area: nested_layout[0],
-                border_color: if self.active_box == ActiveBox::RulesList {
-                    Color::Red
-                } else {
-                    Color::White
+        // We either display the rules list or the box to edit the rules
+        if self.active_box == ActiveBox::EditPage {
+        } else {
+            self.rules_list.render(
+                frame,
+                Props {
+                    area: nested_layout[0],
+                    border_color: if self.active_box == ActiveBox::RulesList {
+                        Color::Red
+                    } else {
+                        Color::White
+                    },
                 },
-            },
-        );
+            );
+        }
+
         self.animation.render(
             frame,
             Props {
