@@ -21,13 +21,12 @@ use std::sync::{
 use tokio::sync::broadcast::{self};
 
 pub struct FirewallEngine {
-    rules: RuleSet,
     nf_queue: Queue,
     log: Log,
 }
 
 impl FirewallEngine {
-    pub fn new(rules: RuleSet) -> Result<(Self, broadcast::Receiver<LogEntry>)> {
+    pub fn new() -> Result<(Self, broadcast::Receiver<LogEntry>)> {
         debug!("Creating new firewall engine");
 
         let mut nf_queue = Queue::open()?;
@@ -35,25 +34,14 @@ impl FirewallEngine {
         nf_queue.bind(0)?;
         debug!("New netfilter queue created");
 
-        match nftables::create_new_table("bleh", rules.clone()) {
-            Ok(()) => {
-                debug!("New table created");
-            }
-            Err(e) => {
-                println!("{}", e);
-            }
-        }
+        nftables::create_test_table();
+        nftables::get_tables();
+
+        nftables::cleanup_tables();
 
         let (log, logs_rx) = Log::new();
 
-        Ok((
-            Self {
-                rules,
-                nf_queue,
-                log,
-            },
-            logs_rx,
-        ))
+        Ok((Self { nf_queue, log }, logs_rx))
     }
 
     pub fn run(&mut self, mut shutdown_rx: broadcast::Receiver<()>) -> Result<()> {
@@ -107,10 +95,6 @@ impl FirewallEngine {
         println!("Log file written to: {}", self.log.get_file_path());
 
         Ok(())
-    }
-
-    pub fn display_rules(&self) {
-        println!("{}", self.rules);
     }
 
     pub fn handle_ipv4(&mut self, packet: &Ipv4Packet) -> Result<()> {

@@ -2,13 +2,109 @@ use super::rules::RuleSet;
 use anyhow::Result;
 use cli_log::debug;
 use rustables::{
-    Batch, Chain, ChainPolicy, ChainType, Hook, HookClass, ProtocolFamily, Rule, Table,
+    Batch, Chain, ChainPolicy, ChainType, Hook, HookClass, MsgType, ProtocolFamily, Rule, Table,
 };
 
 const CHAIN_NAME: &str = "some-chain-name";
 const ALLOW_NAME: &str = "allow-name";
 const DENY_NAME: &str = "deny-name";
 const LOG_NAME: &str = "log-name";
+const TEST_TABLE: &str = "test-table";
+const TEST_CHAIN: &str = "test-chain";
+
+pub fn get_tables() {
+    debug!("Fetching existing tables");
+
+    let mut tables = rustables::list_tables().unwrap();
+
+    if tables.is_empty() {
+        debug!("No tables to process");
+        return;
+    }
+
+    debug!("{} table or tables found", tables.len());
+    debug!("tables: {:?}", tables);
+    let mut table_idx: usize = 0;
+    tables.iter().for_each(|t| {
+        debug!("Processing table: {}", table_idx);
+
+        let chains = rustables::list_chains_for_table(&t).unwrap();
+
+        let mut chain_idx: usize = 0;
+        chains.iter().for_each(|c| {
+            debug!("Processing chain {chain_idx} for table {table_idx}");
+            process_chain(c);
+
+            chain_idx += 1;
+        });
+
+        table_idx += 1;
+    });
+    //tables.iter().map(|t| {
+    //    debug!("Processing table: {}", idx);
+    //    idx += 1;
+    //});
+}
+
+pub fn process_chain(chain: &Chain) {
+    let rules = rustables::list_rules_for_chain(chain).unwrap();
+
+    rules.iter().for_each(|r| {
+        process_rule(r);
+    });
+}
+
+pub fn process_rule(rule: &Rule) {
+    let expressions = rule.get_expressions().ok_or("No expressions");
+    let userdata = rule.get_userdata().ok_or("No userdata");
+
+    debug!("Expressions for rule: {:?}", expressions);
+    let mut expr_idx: usize = 0;
+    expressions.iter().for_each(|e| {
+        debug!("expression: {:?}", e);
+        expr_idx += 1;
+    });
+
+    debug!("Userdata for rule: {:?}", userdata);
+}
+
+pub fn create_test_table() -> Result<()> {
+    debug!("Creating test table");
+    let mut batch = Batch::new();
+
+    let table = Table::new(ProtocolFamily::Inet)
+        .with_name(TEST_TABLE)
+        .add_to_batch(&mut batch);
+
+    let mut chain = Chain::new(&table)
+        .with_name(TEST_CHAIN)
+        .with_hook(Hook::new(HookClass::In, 3))
+        .with_type(ChainType::Filter)
+        .with_policy(ChainPolicy::Accept)
+        .add_to_batch(&mut batch);
+
+    let mut rule = Rule::new(&chain)?
+        .saddr(std::net::IpAddr::from([127, 0, 0, 1]))
+        .accept()
+        .add_to_batch(&mut batch);
+
+    batch.send()?;
+
+    Ok(())
+}
+
+pub fn cleanup_tables() {
+    let mut batch = Batch::new();
+
+    let tables = rustables::list_tables().unwrap();
+
+    tables.iter().for_each(|t| {
+        debug!("deleting {:?} table", t.get_name().ok_or(""));
+        batch.add(t, MsgType::Del);
+    });
+
+    batch.send().unwrap();
+}
 
 pub fn check_for_table(table_name: &str) {
     let mut tables = rustables::list_tables().unwrap();

@@ -1,408 +1,218 @@
-01:55:38.089 [INFO] cli_log::init: Starting firewall-rs v0.1.0 with log level DEBUG
-01:55:38.089 [DEBUG] firewall_rs: Starting CLI
-01:55:38.089 [DEBUG] firewall_rs::cli: Running with the following CLI args: Args { rules_file: "sample-rules-file-toml" }
-01:55:38.090 [DEBUG] firewall_rs::cli: Using the following firewall rules allow
-sources: {}
-destinations: {}
-source networks: {}
-destination networks: {}
-sports: {}
-dports: {}
-deny
-sources: {}
-destinations: {}
-source networks: {}
-destination networks: {}
-sports: {}
-dports: {}
-log
-sources: {127.0.0.1, ::1}
-destinations: {127.0.0.1, ::1}
-source networks: {}
-destination networks: {}
-sports: {22}
-dports: {22}
-01:55:38.090 [DEBUG] firewall_rs::firewall::engine: Creating new firewall engine
-01:55:38.090 [DEBUG] firewall_rs::firewall::engine: New netfilter queue created
-01:55:38.090 [DEBUG] firewall_rs::firewall::nftables: Creating new table bleh
-01:55:38.090 [DEBUG] rustables::query: Listing objects of kind 1
-01:55:38.090 [DEBUG] rustables::query: Calling parse_nlmsg
-01:55:38.090 [DEBUG] rustables::query: Got a valid netlink message: nlmsghdr { nlmsg_len: 20, nlmsg_type: 3, nlmsg_flags: 2, nlmsg_seq: 0, nlmsg_pid: 2724266670 } Done
-01:55:38.091 [DEBUG] firewall_rs::firewall::nftables: Checking for table bleh
-01:55:38.091 [DEBUG] rustables::table: writing attribute name - "bleh"
-01:55:38.091 [DEBUG] rustables::query: Listing objects of kind 4
-01:55:38.091 [DEBUG] rustables::query: Calling parse_nlmsg
-01:55:38.091 [DEBUG] rustables::query: Got a valid netlink message: nlmsghdr { nlmsg_len: 20, nlmsg_type: 3, nlmsg_flags: 2, nlmsg_seq: 0, nlmsg_pid: 3597583607 } Done
-01:55:38.091 [DEBUG] firewall_rs::firewall::nftables: Checking for allow-name chain
-01:55:38.091 [DEBUG] rustables::query: Listing objects of kind 4
-01:55:38.091 [DEBUG] rustables::query: Calling parse_nlmsg
-01:55:38.091 [DEBUG] rustables::query: Got a valid netlink message: nlmsghdr { nlmsg_len: 20, nlmsg_type: 3, nlmsg_flags: 2, nlmsg_seq: 0, nlmsg_pid: 2406770315 } Done
-01:55:38.091 [DEBUG] firewall_rs::firewall::nftables: Checking for deny-name chain
-01:55:38.091 [DEBUG] rustables::query: Listing objects of kind 4
-01:55:38.091 [DEBUG] rustables::query: Calling parse_nlmsg
-01:55:38.091 [DEBUG] rustables::query: Got a valid netlink message: nlmsghdr { nlmsg_len: 20, nlmsg_type: 3, nlmsg_flags: 2, nlmsg_seq: 0, nlmsg_pid: 2979879118 } Done
-01:55:38.091 [DEBUG] firewall_rs::firewall::nftables: Checking for log-name chain
-01:55:38.091 [DEBUG] rustables::chain: writing attribute table - "bleh"
-01:55:38.091 [DEBUG] rustables::chain: writing attribute name - "allow-name"
-01:55:38.091 [DEBUG] rustables::chain: writing attribute hook - Hook { class: Some(1), priority: Some(3) }
-01:55:38.091 [DEBUG] rustables::chain: writing attribute class - 1
-01:55:38.091 [DEBUG] rustables::chain: writing attribute priority - 3
-01:55:38.091 [DEBUG] rustables::chain: writing attribute policy - Drop
-01:55:38.091 [DEBUG] rustables::chain: writing attribute chain_type - Filter
-01:55:38.091 [DEBUG] rustables::chain: writing attribute table - "bleh"
-01:55:38.091 [DEBUG] rustables::chain: writing attribute name - "deny-name"
-01:55:38.091 [DEBUG] rustables::chain: writing attribute hook - Hook { class: Some(1), priority: Some(3) }
-01:55:38.091 [DEBUG] rustables::chain: writing attribute class - 1
-01:55:38.091 [DEBUG] rustables::chain: writing attribute priority - 3
-01:55:38.091 [DEBUG] rustables::chain: writing attribute policy - Accept
-01:55:38.091 [DEBUG] rustables::chain: writing attribute chain_type - Filter
-01:55:38.091 [DEBUG] rustables::chain: writing attribute table - "bleh"
-01:55:38.092 [DEBUG] rustables::chain: writing attribute name - "log-name"
-01:55:38.092 [DEBUG] rustables::chain: writing attribute hook - Hook { class: Some(1), priority: Some(3) }
-01:55:38.092 [DEBUG] rustables::chain: writing attribute class - 1
-01:55:38.092 [DEBUG] rustables::chain: writing attribute priority - 3
-01:55:38.092 [DEBUG] rustables::chain: writing attribute policy - Accept
-01:55:38.092 [DEBUG] rustables::chain: writing attribute chain_type - Filter
-01:55:38.092 [DEBUG] rustables::rule: writing attribute table - "bleh"
-01:55:38.092 [DEBUG] rustables::rule: writing attribute chain - "log-name"
-01:55:38.092 [DEBUG] rustables::rule: writing attribute expressions - NfNetlinkList { objs: [RawExpression { name: Some("meta"), data: Some(Meta(Meta { dreg: Some(Reg1), key: Some(NfProto), sreg: None })) }, RawExpression { name: Some("cmp"), data: Some(Cmp(Cmp { sreg: Some(Reg1), op: Some(Eq), data: Some(NfNetlinkData { value: Some([2]), verdict: None }) })) }, RawExpression { name: Some("payload"), data: Some(Payload(Payload { dreg: Some(Reg1), base: Some(1), offset: Some(12), len: Some(4), sreg: None })) }, RawExpression { name: Some("cmp"), data: Some(Cmp(Cmp { sreg: Some(Reg1), op: Some(Eq), data: Some(NfNetlinkData { value: Some([127, 0, 0, 1]), verdict: None }) })) }, RawExpression { name: Some("immediate"), data: Some(Immediate(Immediate { dreg: Some(Verdict), data: Some(NfNetlinkData { value: None, verdict: Some(Verdict { code: Some(Queue), chain: None, chain_id: None }) }) })) }] }
-01:55:38.092 [DEBUG] rustables::expr: writing attribute name - "meta"
-01:55:38.092 [DEBUG] rustables::expr: writing attribute data - Meta(Meta { dreg: Some(Reg1), key: Some(NfProto), sreg: None })
-01:55:38.092 [DEBUG] rustables::expr::meta: writing attribute dreg - Reg1
-01:55:38.093 [DEBUG] rustables::expr::meta: writing attribute key - NfProto
-01:55:38.093 [DEBUG] rustables::expr: writing attribute name - "cmp"
-01:55:38.093 [DEBUG] rustables::expr: writing attribute data - Cmp(Cmp { sreg: Some(Reg1), op: Some(Eq), data: Some(NfNetlinkData { value: Some([2]), verdict: None }) })
-01:55:38.093 [DEBUG] rustables::expr::cmp: writing attribute sreg - Reg1
-01:55:38.093 [DEBUG] rustables::expr::cmp: writing attribute op - Eq
-01:55:38.093 [DEBUG] rustables::expr::cmp: writing attribute data - NfNetlinkData { value: Some([2]), verdict: None }
-01:55:38.093 [DEBUG] rustables::parser_impls: writing attribute value - [2]
-01:55:38.093 [DEBUG] rustables::expr: writing attribute name - "payload"
-01:55:38.093 [DEBUG] rustables::expr: writing attribute data - Payload(Payload { dreg: Some(Reg1), base: Some(1), offset: Some(12), len: Some(4), sreg: None })
-01:55:38.093 [DEBUG] rustables::expr::payload: writing attribute dreg - Reg1
-01:55:38.093 [DEBUG] rustables::expr::payload: writing attribute base - 1
-01:55:38.093 [DEBUG] rustables::expr::payload: writing attribute offset - 12
-01:55:38.093 [DEBUG] rustables::expr::payload: writing attribute len - 4
-01:55:38.093 [DEBUG] rustables::expr: writing attribute name - "cmp"
-01:55:38.093 [DEBUG] rustables::expr: writing attribute data - Cmp(Cmp { sreg: Some(Reg1), op: Some(Eq), data: Some(NfNetlinkData { value: Some([127, 0, 0, 1]), verdict: None }) })
-01:55:38.093 [DEBUG] rustables::expr::cmp: writing attribute sreg - Reg1
-01:55:38.093 [DEBUG] rustables::expr::cmp: writing attribute op - Eq
-01:55:38.093 [DEBUG] rustables::expr::cmp: writing attribute data - NfNetlinkData { value: Some([127, 0, 0, 1]), verdict: None }
-01:55:38.093 [DEBUG] rustables::parser_impls: writing attribute value - [127, 0, 0, 1]
-01:55:38.093 [DEBUG] rustables::expr: writing attribute name - "immediate"
-01:55:38.093 [DEBUG] rustables::expr: writing attribute data - Immediate(Immediate { dreg: Some(Verdict), data: Some(NfNetlinkData { value: None, verdict: Some(Verdict { code: Some(Queue), chain: None, chain_id: None }) }) })
-01:55:38.093 [DEBUG] rustables::expr::immediate: writing attribute dreg - Verdict
-01:55:38.093 [DEBUG] rustables::expr::immediate: writing attribute data - NfNetlinkData { value: None, verdict: Some(Verdict { code: Some(Queue), chain: None, chain_id: None }) }
-01:55:38.093 [DEBUG] rustables::parser_impls: writing attribute verdict - Verdict { code: Some(Queue), chain: None, chain_id: None }
-01:55:38.094 [DEBUG] rustables::expr::verdict: writing attribute code - Queue
-01:55:38.094 [DEBUG] rustables::rule: writing attribute table - "bleh"
-01:55:38.094 [DEBUG] rustables::rule: writing attribute chain - "log-name"
-01:55:38.094 [DEBUG] rustables::rule: writing attribute expressions - NfNetlinkList { objs: [RawExpression { name: Some("meta"), data: Some(Meta(Meta { dreg: Some(Reg1), key: Some(NfProto), sreg: None })) }, RawExpression { name: Some("cmp"), data: Some(Cmp(Cmp { sreg: Some(Reg1), op: Some(Eq), data: Some(NfNetlinkData { value: Some([10]), verdict: None }) })) }, RawExpression { name: Some("payload"), data: Some(Payload(Payload { dreg: Some(Reg1), base: Some(1), offset: Some(8), len: Some(16), sreg: None })) }, RawExpression { name: Some("cmp"), data: Some(Cmp(Cmp { sreg: Some(Reg1), op: Some(Eq), data: Some(NfNetlinkData { value: Some([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1]), verdict: None }) })) }, RawExpression { name: Some("immediate"), data: Some(Immediate(Immediate { dreg: Some(Verdict), data: Some(NfNetlinkData { value: None, verdict: Some(Verdict { code: Some(Queue), chain: None, chain_id: None }) }) })) }] }
-01:55:38.094 [DEBUG] rustables::expr: writing attribute name - "meta"
-01:55:38.094 [DEBUG] rustables::expr: writing attribute data - Meta(Meta { dreg: Some(Reg1), key: Some(NfProto), sreg: None })
-01:55:38.094 [DEBUG] rustables::expr::meta: writing attribute dreg - Reg1
-01:55:38.094 [DEBUG] rustables::expr::meta: writing attribute key - NfProto
-01:55:38.094 [DEBUG] rustables::expr: writing attribute name - "cmp"
-01:55:38.094 [DEBUG] rustables::expr: writing attribute data - Cmp(Cmp { sreg: Some(Reg1), op: Some(Eq), data: Some(NfNetlinkData { value: Some([10]), verdict: None }) })
-01:55:38.095 [DEBUG] rustables::expr::cmp: writing attribute sreg - Reg1
-01:55:38.095 [DEBUG] rustables::expr::cmp: writing attribute op - Eq
-01:55:38.095 [DEBUG] rustables::expr::cmp: writing attribute data - NfNetlinkData { value: Some([10]), verdict: None }
-01:55:38.095 [DEBUG] rustables::parser_impls: writing attribute value - [10]
-01:55:38.095 [DEBUG] rustables::expr: writing attribute name - "payload"
-01:55:38.095 [DEBUG] rustables::expr: writing attribute data - Payload(Payload { dreg: Some(Reg1), base: Some(1), offset: Some(8), len: Some(16), sreg: None })
-01:55:38.095 [DEBUG] rustables::expr::payload: writing attribute dreg - Reg1
-01:55:38.095 [DEBUG] rustables::expr::payload: writing attribute base - 1
-01:55:38.095 [DEBUG] rustables::expr::payload: writing attribute offset - 8
-01:55:38.095 [DEBUG] rustables::expr::payload: writing attribute len - 16
-01:55:38.095 [DEBUG] rustables::expr: writing attribute name - "cmp"
-01:55:38.095 [DEBUG] rustables::expr: writing attribute data - Cmp(Cmp { sreg: Some(Reg1), op: Some(Eq), data: Some(NfNetlinkData { value: Some([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1]), verdict: None }) })
-01:55:38.095 [DEBUG] rustables::expr::cmp: writing attribute sreg - Reg1
-01:55:38.095 [DEBUG] rustables::expr::cmp: writing attribute op - Eq
-01:55:38.095 [DEBUG] rustables::expr::cmp: writing attribute data - NfNetlinkData { value: Some([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1]), verdict: None }
-01:55:38.095 [DEBUG] rustables::parser_impls: writing attribute value - [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1]
-01:55:38.095 [DEBUG] rustables::expr: writing attribute name - "immediate"
-01:55:38.095 [DEBUG] rustables::expr: writing attribute data - Immediate(Immediate { dreg: Some(Verdict), data: Some(NfNetlinkData { value: None, verdict: Some(Verdict { code: Some(Queue), chain: None, chain_id: None }) }) })
-01:55:38.095 [DEBUG] rustables::expr::immediate: writing attribute dreg - Verdict
-01:55:38.095 [DEBUG] rustables::expr::immediate: writing attribute data - NfNetlinkData { value: None, verdict: Some(Verdict { code: Some(Queue), chain: None, chain_id: None }) }
-01:55:38.096 [DEBUG] rustables::parser_impls: writing attribute verdict - Verdict { code: Some(Queue), chain: None, chain_id: None }
-01:55:38.096 [DEBUG] rustables::expr::verdict: writing attribute code - Queue
-01:55:38.096 [DEBUG] rustables::rule: writing attribute table - "bleh"
-01:55:38.096 [DEBUG] rustables::rule: writing attribute chain - "log-name"
-01:55:38.096 [DEBUG] rustables::rule: writing attribute expressions - NfNetlinkList { objs: [RawExpression { name: Some("meta"), data: Some(Meta(Meta { dreg: Some(Reg1), key: Some(NfProto), sreg: None })) }, RawExpression { name: Some("cmp"), data: Some(Cmp(Cmp { sreg: Some(Reg1), op: Some(Eq), data: Some(NfNetlinkData { value: Some([2]), verdict: None }) })) }, RawExpression { name: Some("payload"), data: Some(Payload(Payload { dreg: Some(Reg1), base: Some(1), offset: Some(16), len: Some(4), sreg: None })) }, RawExpression { name: Some("cmp"), data: Some(Cmp(Cmp { sreg: Some(Reg1), op: Some(Eq), data: Some(NfNetlinkData { value: Some([127, 0, 0, 1]), verdict: None }) })) }, RawExpression { name: Some("immediate"), data: Some(Immediate(Immediate { dreg: Some(Verdict), data: Some(NfNetlinkData { value: None, verdict: Some(Verdict { code: Some(Queue), chain: None, chain_id: None }) }) })) }] }
-01:55:38.096 [DEBUG] rustables::expr: writing attribute name - "meta"
-01:55:38.096 [DEBUG] rustables::expr: writing attribute data - Meta(Meta { dreg: Some(Reg1), key: Some(NfProto), sreg: None })
-01:55:38.096 [DEBUG] rustables::expr::meta: writing attribute dreg - Reg1
-01:55:38.096 [DEBUG] rustables::expr::meta: writing attribute key - NfProto
-01:55:38.096 [DEBUG] rustables::expr: writing attribute name - "cmp"
-01:55:38.096 [DEBUG] rustables::expr: writing attribute data - Cmp(Cmp { sreg: Some(Reg1), op: Some(Eq), data: Some(NfNetlinkData { value: Some([2]), verdict: None }) })
-01:55:38.097 [DEBUG] rustables::expr::cmp: writing attribute sreg - Reg1
-01:55:38.097 [DEBUG] rustables::expr::cmp: writing attribute op - Eq
-01:55:38.097 [DEBUG] rustables::expr::cmp: writing attribute data - NfNetlinkData { value: Some([2]), verdict: None }
-01:55:38.097 [DEBUG] rustables::parser_impls: writing attribute value - [2]
-01:55:38.097 [DEBUG] rustables::expr: writing attribute name - "payload"
-01:55:38.097 [DEBUG] rustables::expr: writing attribute data - Payload(Payload { dreg: Some(Reg1), base: Some(1), offset: Some(16), len: Some(4), sreg: None })
-01:55:38.097 [DEBUG] rustables::expr::payload: writing attribute dreg - Reg1
-01:55:38.097 [DEBUG] rustables::expr::payload: writing attribute base - 1
-01:55:38.097 [DEBUG] rustables::expr::payload: writing attribute offset - 16
-01:55:38.097 [DEBUG] rustables::expr::payload: writing attribute len - 4
-01:55:38.097 [DEBUG] rustables::expr: writing attribute name - "cmp"
-01:55:38.097 [DEBUG] rustables::expr: writing attribute data - Cmp(Cmp { sreg: Some(Reg1), op: Some(Eq), data: Some(NfNetlinkData { value: Some([127, 0, 0, 1]), verdict: None }) })
-01:55:38.097 [DEBUG] rustables::expr::cmp: writing attribute sreg - Reg1
-01:55:38.097 [DEBUG] rustables::expr::cmp: writing attribute op - Eq
-01:55:38.097 [DEBUG] rustables::expr::cmp: writing attribute data - NfNetlinkData { value: Some([127, 0, 0, 1]), verdict: None }
-01:55:38.097 [DEBUG] rustables::parser_impls: writing attribute value - [127, 0, 0, 1]
-01:55:38.097 [DEBUG] rustables::expr: writing attribute name - "immediate"
-01:55:38.097 [DEBUG] rustables::expr: writing attribute data - Immediate(Immediate { dreg: Some(Verdict), data: Some(NfNetlinkData { value: None, verdict: Some(Verdict { code: Some(Queue), chain: None, chain_id: None }) }) })
-01:55:38.097 [DEBUG] rustables::expr::immediate: writing attribute dreg - Verdict
-01:55:38.097 [DEBUG] rustables::expr::immediate: writing attribute data - NfNetlinkData { value: None, verdict: Some(Verdict { code: Some(Queue), chain: None, chain_id: None }) }
-01:55:38.097 [DEBUG] rustables::parser_impls: writing attribute verdict - Verdict { code: Some(Queue), chain: None, chain_id: None }
-01:55:38.097 [DEBUG] rustables::expr::verdict: writing attribute code - Queue
-01:55:38.097 [DEBUG] rustables::rule: writing attribute table - "bleh"
-01:55:38.097 [DEBUG] rustables::rule: writing attribute chain - "log-name"
-01:55:38.097 [DEBUG] rustables::rule: writing attribute expressions - NfNetlinkList { objs: [RawExpression { name: Some("meta"), data: Some(Meta(Meta { dreg: Some(Reg1), key: Some(NfProto), sreg: None })) }, RawExpression { name: Some("cmp"), data: Some(Cmp(Cmp { sreg: Some(Reg1), op: Some(Eq), data: Some(NfNetlinkData { value: Some([10]), verdict: None }) })) }, RawExpression { name: Some("payload"), data: Some(Payload(Payload { dreg: Some(Reg1), base: Some(1), offset: Some(24), len: Some(16), sreg: None })) }, RawExpression { name: Some("cmp"), data: Some(Cmp(Cmp { sreg: Some(Reg1), op: Some(Eq), data: Some(NfNetlinkData { value: Some([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1]), verdict: None }) })) }, RawExpression { name: Some("immediate"), data: Some(Immediate(Immediate { dreg: Some(Verdict), data: Some(NfNetlinkData { value: None, verdict: Some(Verdict { code: Some(Queue), chain: None, chain_id: None }) }) })) }] }
-01:55:38.098 [DEBUG] rustables::expr: writing attribute name - "meta"
-01:55:38.098 [DEBUG] rustables::expr: writing attribute data - Meta(Meta { dreg: Some(Reg1), key: Some(NfProto), sreg: None })
-01:55:38.098 [DEBUG] rustables::expr::meta: writing attribute dreg - Reg1
-01:55:38.098 [DEBUG] rustables::expr::meta: writing attribute key - NfProto
-01:55:38.098 [DEBUG] rustables::expr: writing attribute name - "cmp"
-01:55:38.098 [DEBUG] rustables::expr: writing attribute data - Cmp(Cmp { sreg: Some(Reg1), op: Some(Eq), data: Some(NfNetlinkData { value: Some([10]), verdict: None }) })
-01:55:38.098 [DEBUG] rustables::expr::cmp: writing attribute sreg - Reg1
-01:55:38.098 [DEBUG] rustables::expr::cmp: writing attribute op - Eq
-01:55:38.098 [DEBUG] rustables::expr::cmp: writing attribute data - NfNetlinkData { value: Some([10]), verdict: None }
-01:55:38.098 [DEBUG] rustables::parser_impls: writing attribute value - [10]
-01:55:38.098 [DEBUG] rustables::expr: writing attribute name - "payload"
-01:55:38.098 [DEBUG] rustables::expr: writing attribute data - Payload(Payload { dreg: Some(Reg1), base: Some(1), offset: Some(24), len: Some(16), sreg: None })
-01:55:38.098 [DEBUG] rustables::expr::payload: writing attribute dreg - Reg1
-01:55:38.098 [DEBUG] rustables::expr::payload: writing attribute base - 1
-01:55:38.098 [DEBUG] rustables::expr::payload: writing attribute offset - 24
-01:55:38.098 [DEBUG] rustables::expr::payload: writing attribute len - 16
-01:55:38.098 [DEBUG] rustables::expr: writing attribute name - "cmp"
-01:55:38.098 [DEBUG] rustables::expr: writing attribute data - Cmp(Cmp { sreg: Some(Reg1), op: Some(Eq), data: Some(NfNetlinkData { value: Some([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1]), verdict: None }) })
-01:55:38.098 [DEBUG] rustables::expr::cmp: writing attribute sreg - Reg1
-01:55:38.098 [DEBUG] rustables::expr::cmp: writing attribute op - Eq
-01:55:38.098 [DEBUG] rustables::expr::cmp: writing attribute data - NfNetlinkData { value: Some([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1]), verdict: None }
-01:55:38.098 [DEBUG] rustables::parser_impls: writing attribute value - [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1]
-01:55:38.098 [DEBUG] rustables::expr: writing attribute name - "immediate"
-01:55:38.098 [DEBUG] rustables::expr: writing attribute data - Immediate(Immediate { dreg: Some(Verdict), data: Some(NfNetlinkData { value: None, verdict: Some(Verdict { code: Some(Queue), chain: None, chain_id: None }) }) })
-01:55:38.098 [DEBUG] rustables::expr::immediate: writing attribute dreg - Verdict
-01:55:38.098 [DEBUG] rustables::expr::immediate: writing attribute data - NfNetlinkData { value: None, verdict: Some(Verdict { code: Some(Queue), chain: None, chain_id: None }) }
-01:55:38.099 [DEBUG] rustables::parser_impls: writing attribute verdict - Verdict { code: Some(Queue), chain: None, chain_id: None }
-01:55:38.099 [DEBUG] rustables::expr::verdict: writing attribute code - Queue
-01:55:38.099 [DEBUG] rustables::rule: writing attribute table - "bleh"
-01:55:38.099 [DEBUG] rustables::rule: writing attribute chain - "log-name"
-01:55:38.099 [DEBUG] rustables::rule: writing attribute expressions - NfNetlinkList { objs: [RawExpression { name: Some("meta"), data: Some(Meta(Meta { dreg: Some(Reg1), key: Some(L4Proto), sreg: None })) }, RawExpression { name: Some("cmp"), data: Some(Cmp(Cmp { sreg: Some(Reg1), op: Some(Eq), data: Some(NfNetlinkData { value: Some([6]), verdict: None }) })) }, RawExpression { name: Some("payload"), data: Some(Payload(Payload { dreg: Some(Reg1), base: Some(2), offset: Some(2), len: Some(2), sreg: None })) }, RawExpression { name: Some("cmp"), data: Some(Cmp(Cmp { sreg: Some(Reg1), op: Some(Eq), data: Some(NfNetlinkData { value: Some([0, 22]), verdict: None }) })) }, RawExpression { name: Some("immediate"), data: Some(Immediate(Immediate { dreg: Some(Verdict), data: Some(NfNetlinkData { value: None, verdict: Some(Verdict { code: Some(Queue), chain: None, chain_id: None }) }) })) }] }
-01:55:38.099 [DEBUG] rustables::expr: writing attribute name - "meta"
-01:55:38.099 [DEBUG] rustables::expr: writing attribute data - Meta(Meta { dreg: Some(Reg1), key: Some(L4Proto), sreg: None })
-01:55:38.099 [DEBUG] rustables::expr::meta: writing attribute dreg - Reg1
-01:55:38.099 [DEBUG] rustables::expr::meta: writing attribute key - L4Proto
-01:55:38.099 [DEBUG] rustables::expr: writing attribute name - "cmp"
-01:55:38.099 [DEBUG] rustables::expr: writing attribute data - Cmp(Cmp { sreg: Some(Reg1), op: Some(Eq), data: Some(NfNetlinkData { value: Some([6]), verdict: None }) })
-01:55:38.099 [DEBUG] rustables::expr::cmp: writing attribute sreg - Reg1
-01:55:38.099 [DEBUG] rustables::expr::cmp: writing attribute op - Eq
-01:55:38.099 [DEBUG] rustables::expr::cmp: writing attribute data - NfNetlinkData { value: Some([6]), verdict: None }
-01:55:38.099 [DEBUG] rustables::parser_impls: writing attribute value - [6]
-01:55:38.099 [DEBUG] rustables::expr: writing attribute name - "payload"
-01:55:38.099 [DEBUG] rustables::expr: writing attribute data - Payload(Payload { dreg: Some(Reg1), base: Some(2), offset: Some(2), len: Some(2), sreg: None })
-01:55:38.099 [DEBUG] rustables::expr::payload: writing attribute dreg - Reg1
-01:55:38.099 [DEBUG] rustables::expr::payload: writing attribute base - 2
-01:55:38.099 [DEBUG] rustables::expr::payload: writing attribute offset - 2
-01:55:38.099 [DEBUG] rustables::expr::payload: writing attribute len - 2
-01:55:38.099 [DEBUG] rustables::expr: writing attribute name - "cmp"
-01:55:38.099 [DEBUG] rustables::expr: writing attribute data - Cmp(Cmp { sreg: Some(Reg1), op: Some(Eq), data: Some(NfNetlinkData { value: Some([0, 22]), verdict: None }) })
-01:55:38.099 [DEBUG] rustables::expr::cmp: writing attribute sreg - Reg1
-01:55:38.099 [DEBUG] rustables::expr::cmp: writing attribute op - Eq
-01:55:38.099 [DEBUG] rustables::expr::cmp: writing attribute data - NfNetlinkData { value: Some([0, 22]), verdict: None }
-01:55:38.099 [DEBUG] rustables::parser_impls: writing attribute value - [0, 22]
-01:55:38.099 [DEBUG] rustables::expr: writing attribute name - "immediate"
-01:55:38.100 [DEBUG] rustables::expr: writing attribute data - Immediate(Immediate { dreg: Some(Verdict), data: Some(NfNetlinkData { value: None, verdict: Some(Verdict { code: Some(Queue), chain: None, chain_id: None }) }) })
-01:55:38.100 [DEBUG] rustables::expr::immediate: writing attribute dreg - Verdict
-01:55:38.100 [DEBUG] rustables::expr::immediate: writing attribute data - NfNetlinkData { value: None, verdict: Some(Verdict { code: Some(Queue), chain: None, chain_id: None }) }
-01:55:38.100 [DEBUG] rustables::parser_impls: writing attribute verdict - Verdict { code: Some(Queue), chain: None, chain_id: None }
-01:55:38.100 [DEBUG] rustables::expr::verdict: writing attribute code - Queue
-01:55:38.100 [DEBUG] rustables::rule: writing attribute table - "bleh"
-01:55:38.100 [DEBUG] rustables::rule: writing attribute chain - "log-name"
-01:55:38.100 [DEBUG] rustables::rule: writing attribute expressions - NfNetlinkList { objs: [RawExpression { name: Some("meta"), data: Some(Meta(Meta { dreg: Some(Reg1), key: Some(L4Proto), sreg: None })) }, RawExpression { name: Some("cmp"), data: Some(Cmp(Cmp { sreg: Some(Reg1), op: Some(Eq), data: Some(NfNetlinkData { value: Some([17]), verdict: None }) })) }, RawExpression { name: Some("payload"), data: Some(Payload(Payload { dreg: Some(Reg1), base: Some(2), offset: Some(2), len: Some(2), sreg: None })) }, RawExpression { name: Some("cmp"), data: Some(Cmp(Cmp { sreg: Some(Reg1), op: Some(Eq), data: Some(NfNetlinkData { value: Some([0, 22]), verdict: None }) })) }, RawExpression { name: Some("immediate"), data: Some(Immediate(Immediate { dreg: Some(Verdict), data: Some(NfNetlinkData { value: None, verdict: Some(Verdict { code: Some(Queue), chain: None, chain_id: None }) }) })) }] }
-01:55:38.100 [DEBUG] rustables::expr: writing attribute name - "meta"
-01:55:38.100 [DEBUG] rustables::expr: writing attribute data - Meta(Meta { dreg: Some(Reg1), key: Some(L4Proto), sreg: None })
-01:55:38.100 [DEBUG] rustables::expr::meta: writing attribute dreg - Reg1
-01:55:38.100 [DEBUG] rustables::expr::meta: writing attribute key - L4Proto
-01:55:38.100 [DEBUG] rustables::expr: writing attribute name - "cmp"
-01:55:38.100 [DEBUG] rustables::expr: writing attribute data - Cmp(Cmp { sreg: Some(Reg1), op: Some(Eq), data: Some(NfNetlinkData { value: Some([17]), verdict: None }) })
-01:55:38.100 [DEBUG] rustables::expr::cmp: writing attribute sreg - Reg1
-01:55:38.100 [DEBUG] rustables::expr::cmp: writing attribute op - Eq
-01:55:38.100 [DEBUG] rustables::expr::cmp: writing attribute data - NfNetlinkData { value: Some([17]), verdict: None }
-01:55:38.100 [DEBUG] rustables::parser_impls: writing attribute value - [17]
-01:55:38.100 [DEBUG] rustables::expr: writing attribute name - "payload"
-01:55:38.100 [DEBUG] rustables::expr: writing attribute data - Payload(Payload { dreg: Some(Reg1), base: Some(2), offset: Some(2), len: Some(2), sreg: None })
-01:55:38.100 [DEBUG] rustables::expr::payload: writing attribute dreg - Reg1
-01:55:38.100 [DEBUG] rustables::expr::payload: writing attribute base - 2
-01:55:38.100 [DEBUG] rustables::expr::payload: writing attribute offset - 2
-01:55:38.100 [DEBUG] rustables::expr::payload: writing attribute len - 2
-01:55:38.100 [DEBUG] rustables::expr: writing attribute name - "cmp"
-01:55:38.100 [DEBUG] rustables::expr: writing attribute data - Cmp(Cmp { sreg: Some(Reg1), op: Some(Eq), data: Some(NfNetlinkData { value: Some([0, 22]), verdict: None }) })
-01:55:38.101 [DEBUG] rustables::expr::cmp: writing attribute sreg - Reg1
-01:55:38.101 [DEBUG] rustables::expr::cmp: writing attribute op - Eq
-01:55:38.101 [DEBUG] rustables::expr::cmp: writing attribute data - NfNetlinkData { value: Some([0, 22]), verdict: None }
-01:55:38.101 [DEBUG] rustables::parser_impls: writing attribute value - [0, 22]
-01:55:38.101 [DEBUG] rustables::expr: writing attribute name - "immediate"
-01:55:38.101 [DEBUG] rustables::expr: writing attribute data - Immediate(Immediate { dreg: Some(Verdict), data: Some(NfNetlinkData { value: None, verdict: Some(Verdict { code: Some(Queue), chain: None, chain_id: None }) }) })
-01:55:38.101 [DEBUG] rustables::expr::immediate: writing attribute dreg - Verdict
-01:55:38.101 [DEBUG] rustables::expr::immediate: writing attribute data - NfNetlinkData { value: None, verdict: Some(Verdict { code: Some(Queue), chain: None, chain_id: None }) }
-01:55:38.101 [DEBUG] rustables::parser_impls: writing attribute verdict - Verdict { code: Some(Queue), chain: None, chain_id: None }
-01:55:38.101 [DEBUG] rustables::expr::verdict: writing attribute code - Queue
-01:55:38.101 [DEBUG] rustables::rule: writing attribute table - "bleh"
-01:55:38.101 [DEBUG] rustables::rule: writing attribute chain - "log-name"
-01:55:38.101 [DEBUG] rustables::rule: writing attribute expressions - NfNetlinkList { objs: [RawExpression { name: Some("meta"), data: Some(Meta(Meta { dreg: Some(Reg1), key: Some(L4Proto), sreg: None })) }, RawExpression { name: Some("cmp"), data: Some(Cmp(Cmp { sreg: Some(Reg1), op: Some(Eq), data: Some(NfNetlinkData { value: Some([6]), verdict: None }) })) }, RawExpression { name: Some("payload"), data: Some(Payload(Payload { dreg: Some(Reg1), base: Some(2), offset: Some(2), len: Some(2), sreg: None })) }, RawExpression { name: Some("cmp"), data: Some(Cmp(Cmp { sreg: Some(Reg1), op: Some(Eq), data: Some(NfNetlinkData { value: Some([0, 22]), verdict: None }) })) }, RawExpression { name: Some("immediate"), data: Some(Immediate(Immediate { dreg: Some(Verdict), data: Some(NfNetlinkData { value: None, verdict: Some(Verdict { code: Some(Queue), chain: None, chain_id: None }) }) })) }] }
-01:55:38.101 [DEBUG] rustables::expr: writing attribute name - "meta"
-01:55:38.101 [DEBUG] rustables::expr: writing attribute data - Meta(Meta { dreg: Some(Reg1), key: Some(L4Proto), sreg: None })
-01:55:38.101 [DEBUG] rustables::expr::meta: writing attribute dreg - Reg1
-01:55:38.101 [DEBUG] rustables::expr::meta: writing attribute key - L4Proto
-01:55:38.101 [DEBUG] rustables::expr: writing attribute name - "cmp"
-01:55:38.101 [DEBUG] rustables::expr: writing attribute data - Cmp(Cmp { sreg: Some(Reg1), op: Some(Eq), data: Some(NfNetlinkData { value: Some([6]), verdict: None }) })
-01:55:38.101 [DEBUG] rustables::expr::cmp: writing attribute sreg - Reg1
-01:55:38.101 [DEBUG] rustables::expr::cmp: writing attribute op - Eq
-01:55:38.101 [DEBUG] rustables::expr::cmp: writing attribute data - NfNetlinkData { value: Some([6]), verdict: None }
-01:55:38.101 [DEBUG] rustables::parser_impls: writing attribute value - [6]
-01:55:38.101 [DEBUG] rustables::expr: writing attribute name - "payload"
-01:55:38.101 [DEBUG] rustables::expr: writing attribute data - Payload(Payload { dreg: Some(Reg1), base: Some(2), offset: Some(2), len: Some(2), sreg: None })
-01:55:38.101 [DEBUG] rustables::expr::payload: writing attribute dreg - Reg1
-01:55:38.102 [DEBUG] rustables::expr::payload: writing attribute base - 2
-01:55:38.102 [DEBUG] rustables::expr::payload: writing attribute offset - 2
-01:55:38.102 [DEBUG] rustables::expr::payload: writing attribute len - 2
-01:55:38.102 [DEBUG] rustables::expr: writing attribute name - "cmp"
-01:55:38.102 [DEBUG] rustables::expr: writing attribute data - Cmp(Cmp { sreg: Some(Reg1), op: Some(Eq), data: Some(NfNetlinkData { value: Some([0, 22]), verdict: None }) })
-01:55:38.102 [DEBUG] rustables::expr::cmp: writing attribute sreg - Reg1
-01:55:38.102 [DEBUG] rustables::expr::cmp: writing attribute op - Eq
-01:55:38.102 [DEBUG] rustables::expr::cmp: writing attribute data - NfNetlinkData { value: Some([0, 22]), verdict: None }
-01:55:38.102 [DEBUG] rustables::parser_impls: writing attribute value - [0, 22]
-01:55:38.102 [DEBUG] rustables::expr: writing attribute name - "immediate"
-01:55:38.102 [DEBUG] rustables::expr: writing attribute data - Immediate(Immediate { dreg: Some(Verdict), data: Some(NfNetlinkData { value: None, verdict: Some(Verdict { code: Some(Queue), chain: None, chain_id: None }) }) })
-01:55:38.102 [DEBUG] rustables::expr::immediate: writing attribute dreg - Verdict
-01:55:38.102 [DEBUG] rustables::expr::immediate: writing attribute data - NfNetlinkData { value: None, verdict: Some(Verdict { code: Some(Queue), chain: None, chain_id: None }) }
-01:55:38.102 [DEBUG] rustables::parser_impls: writing attribute verdict - Verdict { code: Some(Queue), chain: None, chain_id: None }
-01:55:38.102 [DEBUG] rustables::expr::verdict: writing attribute code - Queue
-01:55:38.102 [DEBUG] rustables::rule: writing attribute table - "bleh"
-01:55:38.102 [DEBUG] rustables::rule: writing attribute chain - "log-name"
-01:55:38.102 [DEBUG] rustables::rule: writing attribute expressions - NfNetlinkList { objs: [RawExpression { name: Some("meta"), data: Some(Meta(Meta { dreg: Some(Reg1), key: Some(L4Proto), sreg: None })) }, RawExpression { name: Some("cmp"), data: Some(Cmp(Cmp { sreg: Some(Reg1), op: Some(Eq), data: Some(NfNetlinkData { value: Some([17]), verdict: None }) })) }, RawExpression { name: Some("payload"), data: Some(Payload(Payload { dreg: Some(Reg1), base: Some(2), offset: Some(0), len: Some(2), sreg: None })) }, RawExpression { name: Some("cmp"), data: Some(Cmp(Cmp { sreg: Some(Reg1), op: Some(Eq), data: Some(NfNetlinkData { value: Some([0, 22]), verdict: None }) })) }, RawExpression { name: Some("immediate"), data: Some(Immediate(Immediate { dreg: Some(Verdict), data: Some(NfNetlinkData { value: None, verdict: Some(Verdict { code: Some(Queue), chain: None, chain_id: None }) }) })) }] }
-01:55:38.102 [DEBUG] rustables::expr: writing attribute name - "meta"
-01:55:38.102 [DEBUG] rustables::expr: writing attribute data - Meta(Meta { dreg: Some(Reg1), key: Some(L4Proto), sreg: None })
-01:55:38.102 [DEBUG] rustables::expr::meta: writing attribute dreg - Reg1
-01:55:38.102 [DEBUG] rustables::expr::meta: writing attribute key - L4Proto
-01:55:38.102 [DEBUG] rustables::expr: writing attribute name - "cmp"
-01:55:38.102 [DEBUG] rustables::expr: writing attribute data - Cmp(Cmp { sreg: Some(Reg1), op: Some(Eq), data: Some(NfNetlinkData { value: Some([17]), verdict: None }) })
-01:55:38.102 [DEBUG] rustables::expr::cmp: writing attribute sreg - Reg1
-01:55:38.102 [DEBUG] rustables::expr::cmp: writing attribute op - Eq
-01:55:38.102 [DEBUG] rustables::expr::cmp: writing attribute data - NfNetlinkData { value: Some([17]), verdict: None }
-01:55:38.102 [DEBUG] rustables::parser_impls: writing attribute value - [17]
-01:55:38.102 [DEBUG] rustables::expr: writing attribute name - "payload"
-01:55:38.102 [DEBUG] rustables::expr: writing attribute data - Payload(Payload { dreg: Some(Reg1), base: Some(2), offset: Some(0), len: Some(2), sreg: None })
-01:55:38.103 [DEBUG] rustables::expr::payload: writing attribute dreg - Reg1
-01:55:38.103 [DEBUG] rustables::expr::payload: writing attribute base - 2
-01:55:38.103 [DEBUG] rustables::expr::payload: writing attribute offset - 0
-01:55:38.103 [DEBUG] rustables::expr::payload: writing attribute len - 2
-01:55:38.103 [DEBUG] rustables::expr: writing attribute name - "cmp"
-01:55:38.103 [DEBUG] rustables::expr: writing attribute data - Cmp(Cmp { sreg: Some(Reg1), op: Some(Eq), data: Some(NfNetlinkData { value: Some([0, 22]), verdict: None }) })
-01:55:38.103 [DEBUG] rustables::expr::cmp: writing attribute sreg - Reg1
-01:55:38.103 [DEBUG] rustables::expr::cmp: writing attribute op - Eq
-01:55:38.103 [DEBUG] rustables::expr::cmp: writing attribute data - NfNetlinkData { value: Some([0, 22]), verdict: None }
-01:55:38.103 [DEBUG] rustables::parser_impls: writing attribute value - [0, 22]
-01:55:38.103 [DEBUG] rustables::expr: writing attribute name - "immediate"
-01:55:38.103 [DEBUG] rustables::expr: writing attribute data - Immediate(Immediate { dreg: Some(Verdict), data: Some(NfNetlinkData { value: None, verdict: Some(Verdict { code: Some(Queue), chain: None, chain_id: None }) }) })
-01:55:38.103 [DEBUG] rustables::expr::immediate: writing attribute dreg - Verdict
-01:55:38.103 [DEBUG] rustables::expr::immediate: writing attribute data - NfNetlinkData { value: None, verdict: Some(Verdict { code: Some(Queue), chain: None, chain_id: None }) }
-01:55:38.103 [DEBUG] rustables::parser_impls: writing attribute verdict - Verdict { code: Some(Queue), chain: None, chain_id: None }
-01:55:38.103 [DEBUG] rustables::expr::verdict: writing attribute code - Queue
-01:55:38.103 [DEBUG] rustables::query: Calling parse_nlmsg
-01:55:38.103 [DEBUG] rustables::query: Got a valid netlink message: nlmsghdr { nlmsg_len: 36, nlmsg_type: 2, nlmsg_flags: 256, nlmsg_seq: 0, nlmsg_pid: 3732998004 } Error(nlmsgerr { error: 0, msg: nlmsghdr { nlmsg_len: 20, nlmsg_type: 16, nlmsg_flags: 5, nlmsg_seq: 0, nlmsg_pid: 0 } })
-01:55:38.103 [DEBUG] rustables::query: Calling parse_nlmsg
-01:55:38.103 [DEBUG] rustables::query: Got a valid netlink message: nlmsghdr { nlmsg_len: 36, nlmsg_type: 2, nlmsg_flags: 256, nlmsg_seq: 1, nlmsg_pid: 3732998004 } Error(nlmsgerr { error: 0, msg: nlmsghdr { nlmsg_len: 28, nlmsg_type: 2560, nlmsg_flags: 1029, nlmsg_seq: 1, nlmsg_pid: 0 } })
-01:55:38.103 [DEBUG] rustables::query: Calling parse_nlmsg
-01:55:38.103 [DEBUG] rustables::query: Got a valid netlink message: nlmsghdr { nlmsg_len: 36, nlmsg_type: 2, nlmsg_flags: 256, nlmsg_seq: 2, nlmsg_pid: 3732998004 } Error(nlmsgerr { error: 0, msg: nlmsghdr { nlmsg_len: 84, nlmsg_type: 2563, nlmsg_flags: 1029, nlmsg_seq: 2, nlmsg_pid: 0 } })
-01:55:38.103 [DEBUG] rustables::query: Calling parse_nlmsg
-01:55:38.103 [DEBUG] rustables::query: Got a valid netlink message: nlmsghdr { nlmsg_len: 36, nlmsg_type: 2, nlmsg_flags: 256, nlmsg_seq: 3, nlmsg_pid: 3732998004 } Error(nlmsgerr { error: 0, msg: nlmsghdr { nlmsg_len: 84, nlmsg_type: 2563, nlmsg_flags: 1029, nlmsg_seq: 3, nlmsg_pid: 0 } })
-01:55:38.103 [DEBUG] rustables::query: Calling parse_nlmsg
-01:55:38.104 [DEBUG] rustables::query: Got a valid netlink message: nlmsghdr { nlmsg_len: 36, nlmsg_type: 2, nlmsg_flags: 256, nlmsg_seq: 4, nlmsg_pid: 3732998004 } Error(nlmsgerr { error: 0, msg: nlmsghdr { nlmsg_len: 80, nlmsg_type: 2563, nlmsg_flags: 1029, nlmsg_seq: 4, nlmsg_pid: 0 } })
-01:55:38.104 [DEBUG] rustables::query: Calling parse_nlmsg
-01:55:38.104 [DEBUG] rustables::query: Got a valid netlink message: nlmsghdr { nlmsg_len: 36, nlmsg_type: 2, nlmsg_flags: 256, nlmsg_seq: 5, nlmsg_pid: 3732998004 } Error(nlmsgerr { error: 0, msg: nlmsghdr { nlmsg_len: 264, nlmsg_type: 2566, nlmsg_flags: 3077, nlmsg_seq: 5, nlmsg_pid: 0 } })
-01:55:38.104 [DEBUG] rustables::query: Calling parse_nlmsg
-01:55:38.104 [DEBUG] rustables::query: Got a valid netlink message: nlmsghdr { nlmsg_len: 36, nlmsg_type: 2, nlmsg_flags: 256, nlmsg_seq: 6, nlmsg_pid: 3732998004 } Error(nlmsgerr { error: 0, msg: nlmsghdr { nlmsg_len: 276, nlmsg_type: 2566, nlmsg_flags: 3077, nlmsg_seq: 6, nlmsg_pid: 0 } })
-01:55:38.104 [DEBUG] rustables::query: Calling parse_nlmsg
-01:55:38.104 [DEBUG] rustables::query: Got a valid netlink message: nlmsghdr { nlmsg_len: 36, nlmsg_type: 2, nlmsg_flags: 256, nlmsg_seq: 7, nlmsg_pid: 3732998004 } Error(nlmsgerr { error: 0, msg: nlmsghdr { nlmsg_len: 264, nlmsg_type: 2566, nlmsg_flags: 3077, nlmsg_seq: 7, nlmsg_pid: 0 } })
-01:55:38.104 [DEBUG] rustables::query: Calling parse_nlmsg
-01:55:38.104 [DEBUG] rustables::query: Got a valid netlink message: nlmsghdr { nlmsg_len: 36, nlmsg_type: 2, nlmsg_flags: 256, nlmsg_seq: 8, nlmsg_pid: 3732998004 } Error(nlmsgerr { error: 0, msg: nlmsghdr { nlmsg_len: 276, nlmsg_type: 2566, nlmsg_flags: 3077, nlmsg_seq: 8, nlmsg_pid: 0 } })
-01:55:38.105 [DEBUG] rustables::query: Calling parse_nlmsg
-01:55:38.105 [DEBUG] rustables::query: Got a valid netlink message: nlmsghdr { nlmsg_len: 36, nlmsg_type: 2, nlmsg_flags: 256, nlmsg_seq: 9, nlmsg_pid: 3732998004 } Error(nlmsgerr { error: 0, msg: nlmsghdr { nlmsg_len: 264, nlmsg_type: 2566, nlmsg_flags: 3077, nlmsg_seq: 9, nlmsg_pid: 0 } })
-01:55:38.105 [DEBUG] rustables::query: Calling parse_nlmsg
-01:55:38.105 [DEBUG] rustables::query: Got a valid netlink message: nlmsghdr { nlmsg_len: 36, nlmsg_type: 2, nlmsg_flags: 256, nlmsg_seq: 10, nlmsg_pid: 3732998004 } Error(nlmsgerr { error: 0, msg: nlmsghdr { nlmsg_len: 264, nlmsg_type: 2566, nlmsg_flags: 3077, nlmsg_seq: 10, nlmsg_pid: 0 } })
-01:55:38.105 [DEBUG] rustables::query: Calling parse_nlmsg
-01:55:38.105 [DEBUG] rustables::query: Got a valid netlink message: nlmsghdr { nlmsg_len: 36, nlmsg_type: 2, nlmsg_flags: 256, nlmsg_seq: 11, nlmsg_pid: 3732998004 } Error(nlmsgerr { error: 0, msg: nlmsghdr { nlmsg_len: 264, nlmsg_type: 2566, nlmsg_flags: 3077, nlmsg_seq: 11, nlmsg_pid: 0 } })
-01:55:38.105 [DEBUG] rustables::query: Calling parse_nlmsg
-01:55:38.105 [DEBUG] rustables::query: Got a valid netlink message: nlmsghdr { nlmsg_len: 36, nlmsg_type: 2, nlmsg_flags: 256, nlmsg_seq: 12, nlmsg_pid: 3732998004 } Error(nlmsgerr { error: 0, msg: nlmsghdr { nlmsg_len: 264, nlmsg_type: 2566, nlmsg_flags: 3077, nlmsg_seq: 12, nlmsg_pid: 0 } })
-01:55:38.105 [DEBUG] firewall_rs::firewall::engine: New table created
-01:55:38.105 [DEBUG] firewall_rs::app: Running app
-01:55:38.106 [INFO] firewall_rs::firewall::engine: Engine is running
-01:55:38.107 [DEBUG] firewall_rs::app::app_router: Updating with None
-01:55:38.109 [DEBUG] firewall_rs::app::components::rules_list: current tab: 0
-01:55:39.106 [DEBUG] firewall_rs::app::app_router: Updating with None
-01:55:39.107 [DEBUG] firewall_rs::app::components::rules_list: current tab: 0
-01:55:39.454 [DEBUG] firewall_rs::app::event_handler: sending: KeyEvent { code: Char('r'), modifiers: KeyModifiers(0x0), kind: Press, state: KeyEventState(0x0) }
-01:55:39.454 [DEBUG] firewall_rs::app::event_handler: Ok(())
-01:55:39.454 [DEBUG] firewall_rs::app::app_router: Sending SelectRulesList
-01:55:39.455 [DEBUG] firewall_rs::app::components::rules_list: current tab: 0
-01:55:39.459 [DEBUG] firewall_rs::app::app_router: Updating with RulesList
-01:55:39.459 [DEBUG] firewall_rs::app::components::rules_list: current tab: 0
-01:55:39.669 [DEBUG] firewall_rs::app::event_handler: sending: KeyEvent { code: Right, modifiers: KeyModifiers(0x0), kind: Press, state: KeyEventState(0x0) }
-01:55:39.670 [DEBUG] firewall_rs::app::event_handler: Ok(())
-01:55:39.672 [DEBUG] firewall_rs::app::components::rules_list: current tab: 1
-01:55:39.851 [DEBUG] firewall_rs::app::event_handler: sending: KeyEvent { code: Right, modifiers: KeyModifiers(0x0), kind: Press, state: KeyEventState(0x0) }
-01:55:39.851 [DEBUG] firewall_rs::app::event_handler: Ok(())
-01:55:39.851 [DEBUG] firewall_rs::app::components::rules_list: current tab: 2
-01:55:40.077 [DEBUG] firewall_rs::app::event_handler: sending: KeyEvent { code: Right, modifiers: KeyModifiers(0x0), kind: Press, state: KeyEventState(0x0) }
-01:55:40.077 [DEBUG] firewall_rs::app::event_handler: Ok(())
-01:55:40.077 [DEBUG] firewall_rs::app::components::rules_list: current tab: 2
-01:55:40.107 [DEBUG] firewall_rs::app::app_router: Updating with RulesList
-01:55:40.107 [DEBUG] firewall_rs::app::components::rules_list: current tab: 2
-01:55:40.344 [DEBUG] firewall_rs::app::event_handler: sending: KeyEvent { code: Left, modifiers: KeyModifiers(0x0), kind: Press, state: KeyEventState(0x0) }
-01:55:40.344 [DEBUG] firewall_rs::app::event_handler: Ok(())
-01:55:40.345 [DEBUG] firewall_rs::app::components::rules_list: current tab: 1
-01:55:40.521 [DEBUG] firewall_rs::app::event_handler: sending: KeyEvent { code: Left, modifiers: KeyModifiers(0x0), kind: Press, state: KeyEventState(0x0) }
-01:55:40.521 [DEBUG] firewall_rs::app::event_handler: Ok(())
-01:55:40.521 [DEBUG] firewall_rs::app::components::rules_list: current tab: 0
-01:55:40.664 [DEBUG] firewall_rs::app::event_handler: sending: KeyEvent { code: Left, modifiers: KeyModifiers(0x0), kind: Press, state: KeyEventState(0x0) }
-01:55:40.664 [DEBUG] firewall_rs::app::event_handler: Ok(())
-01:55:40.665 [DEBUG] firewall_rs::app::components::rules_list: current tab: 0
-01:55:40.841 [DEBUG] firewall_rs::app::event_handler: sending: KeyEvent { code: Right, modifiers: KeyModifiers(0x0), kind: Press, state: KeyEventState(0x0) }
-01:55:40.841 [DEBUG] firewall_rs::app::event_handler: Ok(())
-01:55:40.842 [DEBUG] firewall_rs::app::components::rules_list: current tab: 1
-01:55:40.992 [DEBUG] firewall_rs::app::event_handler: sending: KeyEvent { code: Right, modifiers: KeyModifiers(0x0), kind: Press, state: KeyEventState(0x0) }
-01:55:40.992 [DEBUG] firewall_rs::app::event_handler: Ok(())
-01:55:40.993 [DEBUG] firewall_rs::app::components::rules_list: current tab: 2
-01:55:41.106 [DEBUG] firewall_rs::app::app_router: Updating with RulesList
-01:55:41.107 [DEBUG] firewall_rs::app::components::rules_list: current tab: 2
-01:55:41.113 [DEBUG] firewall_rs::app::event_handler: sending: KeyEvent { code: Right, modifiers: KeyModifiers(0x0), kind: Press, state: KeyEventState(0x0) }
-01:55:41.113 [DEBUG] firewall_rs::app::event_handler: Ok(())
-01:55:41.113 [DEBUG] firewall_rs::app::components::rules_list: current tab: 2
-01:55:41.256 [DEBUG] firewall_rs::app::event_handler: sending: KeyEvent { code: Left, modifiers: KeyModifiers(0x0), kind: Press, state: KeyEventState(0x0) }
-01:55:41.256 [DEBUG] firewall_rs::app::event_handler: Ok(())
-01:55:41.256 [DEBUG] firewall_rs::app::components::rules_list: current tab: 1
-01:55:41.408 [DEBUG] firewall_rs::app::event_handler: sending: KeyEvent { code: Left, modifiers: KeyModifiers(0x0), kind: Press, state: KeyEventState(0x0) }
-01:55:41.408 [DEBUG] firewall_rs::app::event_handler: Ok(())
-01:55:41.409 [DEBUG] firewall_rs::app::components::rules_list: current tab: 0
-01:55:41.533 [DEBUG] firewall_rs::app::event_handler: sending: KeyEvent { code: Left, modifiers: KeyModifiers(0x0), kind: Press, state: KeyEventState(0x0) }
-01:55:41.534 [DEBUG] firewall_rs::app::event_handler: Ok(())
-01:55:41.534 [DEBUG] firewall_rs::app::components::rules_list: current tab: 0
-01:55:41.973 [DEBUG] firewall_rs::app::event_handler: sending: KeyEvent { code: Esc, modifiers: KeyModifiers(0x0), kind: Press, state: KeyEventState(0x0) }
-01:55:41.973 [DEBUG] firewall_rs::app::event_handler: Ok(())
-01:55:41.974 [DEBUG] firewall_rs::app::components::rules_list: current tab: 0
-01:55:41.977 [DEBUG] firewall_rs::app::app_router: Updating with None
-01:55:41.977 [DEBUG] firewall_rs::app::components::rules_list: current tab: 0
-01:55:42.106 [DEBUG] firewall_rs::app::app_router: Updating with None
-01:55:42.107 [DEBUG] firewall_rs::app::components::rules_list: current tab: 0
-01:55:42.121 [DEBUG] firewall_rs::app::event_handler: sending: KeyEvent { code: Esc, modifiers: KeyModifiers(0x0), kind: Press, state: KeyEventState(0x0) }
-01:55:42.121 [DEBUG] firewall_rs::app::event_handler: Ok(())
-01:55:42.122 [DEBUG] firewall_rs::app::components::rules_list: current tab: 0
-01:55:42.125 [DEBUG] firewall_rs::app: Quitting app
-01:55:42.125 [DEBUG] firewall_rs::app::components::rules_list: current tab: 0
-01:55:42.128 [DEBUG] firewall_rs::cli: Ok(())
-01:55:42.128 [DEBUG] firewall_rs::cli: Ok(())
-01:55:42.128 [DEBUG] firewall_rs: CLI exited
-01:55:42.128 [INFO] cli_log::mem: Physical mem usage: current=10M, peak=1.2G
+00:35:43.422 [INFO] cli_log::init: Starting firewall-rs v0.1.0 with log level DEBUG
+00:35:43.422 [DEBUG] firewall_rs: Starting CLI
+00:35:43.422 [DEBUG] firewall_rs::firewall::engine: Creating new firewall engine
+00:35:43.422 [DEBUG] firewall_rs::firewall::engine: New netfilter queue created
+00:35:43.422 [DEBUG] firewall_rs::firewall::nftables: Creating test table
+00:35:43.422 [DEBUG] rustables::table: writing attribute name - "test-table"
+00:35:43.422 [DEBUG] rustables::chain: writing attribute table - "test-table"
+00:35:43.422 [DEBUG] rustables::chain: writing attribute name - "test-chain"
+00:35:43.422 [DEBUG] rustables::chain: writing attribute hook - Hook { class: Some(1), priority: Some(3) }
+00:35:43.422 [DEBUG] rustables::chain: writing attribute class - 1
+00:35:43.422 [DEBUG] rustables::chain: writing attribute priority - 3
+00:35:43.422 [DEBUG] rustables::chain: writing attribute policy - Accept
+00:35:43.422 [DEBUG] rustables::chain: writing attribute chain_type - Filter
+00:35:43.422 [DEBUG] rustables::rule: writing attribute table - "test-table"
+00:35:43.422 [DEBUG] rustables::rule: writing attribute chain - "test-chain"
+00:35:43.422 [DEBUG] rustables::rule: writing attribute expressions - NfNetlinkList { objs: [RawExpression { name: Some("meta"), data: Some(Meta(Meta { dreg: Some(Reg1), key: Some(NfProto), sreg: None })) }, RawExpression { name: Some("cmp"), data: Some(Cmp(Cmp { sreg: Some(Reg1), op: Some(Eq), data: Some(NfNetlinkData { value: Some([2]), verdict: None }) })) }, RawExpression { name: Some("payload"), data: Some(Payload(Payload { dreg: Some(Reg1), base: Some(1), offset: Some(12), len: Some(4), sreg: None })) }, RawExpression { name: Some("cmp"), data: Some(Cmp(Cmp { sreg: Some(Reg1), op: Some(Eq), data: Some(NfNetlinkData { value: Some([127, 0, 0, 1]), verdict: None }) })) }, RawExpression { name: Some("immediate"), data: Some(Immediate(Immediate { dreg: Some(Verdict), data: Some(NfNetlinkData { value: None, verdict: Some(Verdict { code: Some(Accept), chain: None, chain_id: None }) }) })) }] }
+00:35:43.423 [DEBUG] rustables::expr: writing attribute name - "meta"
+00:35:43.423 [DEBUG] rustables::expr: writing attribute data - Meta(Meta { dreg: Some(Reg1), key: Some(NfProto), sreg: None })
+00:35:43.423 [DEBUG] rustables::expr::meta: writing attribute dreg - Reg1
+00:35:43.423 [DEBUG] rustables::expr::meta: writing attribute key - NfProto
+00:35:43.423 [DEBUG] rustables::expr: writing attribute name - "cmp"
+00:35:43.423 [DEBUG] rustables::expr: writing attribute data - Cmp(Cmp { sreg: Some(Reg1), op: Some(Eq), data: Some(NfNetlinkData { value: Some([2]), verdict: None }) })
+00:35:43.423 [DEBUG] rustables::expr::cmp: writing attribute sreg - Reg1
+00:35:43.423 [DEBUG] rustables::expr::cmp: writing attribute op - Eq
+00:35:43.423 [DEBUG] rustables::expr::cmp: writing attribute data - NfNetlinkData { value: Some([2]), verdict: None }
+00:35:43.423 [DEBUG] rustables::parser_impls: writing attribute value - [2]
+00:35:43.423 [DEBUG] rustables::expr: writing attribute name - "payload"
+00:35:43.423 [DEBUG] rustables::expr: writing attribute data - Payload(Payload { dreg: Some(Reg1), base: Some(1), offset: Some(12), len: Some(4), sreg: None })
+00:35:43.423 [DEBUG] rustables::expr::payload: writing attribute dreg - Reg1
+00:35:43.423 [DEBUG] rustables::expr::payload: writing attribute base - 1
+00:35:43.424 [DEBUG] rustables::expr::payload: writing attribute offset - 12
+00:35:43.424 [DEBUG] rustables::expr::payload: writing attribute len - 4
+00:35:43.424 [DEBUG] rustables::expr: writing attribute name - "cmp"
+00:35:43.424 [DEBUG] rustables::expr: writing attribute data - Cmp(Cmp { sreg: Some(Reg1), op: Some(Eq), data: Some(NfNetlinkData { value: Some([127, 0, 0, 1]), verdict: None }) })
+00:35:43.424 [DEBUG] rustables::expr::cmp: writing attribute sreg - Reg1
+00:35:43.424 [DEBUG] rustables::expr::cmp: writing attribute op - Eq
+00:35:43.424 [DEBUG] rustables::expr::cmp: writing attribute data - NfNetlinkData { value: Some([127, 0, 0, 1]), verdict: None }
+00:35:43.424 [DEBUG] rustables::parser_impls: writing attribute value - [127, 0, 0, 1]
+00:35:43.424 [DEBUG] rustables::expr: writing attribute name - "immediate"
+00:35:43.424 [DEBUG] rustables::expr: writing attribute data - Immediate(Immediate { dreg: Some(Verdict), data: Some(NfNetlinkData { value: None, verdict: Some(Verdict { code: Some(Accept), chain: None, chain_id: None }) }) })
+00:35:43.424 [DEBUG] rustables::expr::immediate: writing attribute dreg - Verdict
+00:35:43.424 [DEBUG] rustables::expr::immediate: writing attribute data - NfNetlinkData { value: None, verdict: Some(Verdict { code: Some(Accept), chain: None, chain_id: None }) }
+00:35:43.424 [DEBUG] rustables::parser_impls: writing attribute verdict - Verdict { code: Some(Accept), chain: None, chain_id: None }
+00:35:43.424 [DEBUG] rustables::expr::verdict: writing attribute code - Accept
+00:35:43.424 [DEBUG] rustables::query: Calling parse_nlmsg
+00:35:43.424 [DEBUG] rustables::query: Got a valid netlink message: nlmsghdr { nlmsg_len: 36, nlmsg_type: 2, nlmsg_flags: 256, nlmsg_seq: 0, nlmsg_pid: 2670255607 } Error(nlmsgerr { error: 0, msg: nlmsghdr { nlmsg_len: 20, nlmsg_type: 16, nlmsg_flags: 5, nlmsg_seq: 0, nlmsg_pid: 0 } })
+00:35:43.424 [DEBUG] rustables::query: Calling parse_nlmsg
+00:35:43.424 [DEBUG] rustables::query: Got a valid netlink message: nlmsghdr { nlmsg_len: 36, nlmsg_type: 2, nlmsg_flags: 256, nlmsg_seq: 1, nlmsg_pid: 2670255607 } Error(nlmsgerr { error: 0, msg: nlmsghdr { nlmsg_len: 36, nlmsg_type: 2560, nlmsg_flags: 1029, nlmsg_seq: 1, nlmsg_pid: 0 } })
+00:35:43.424 [DEBUG] rustables::query: Calling parse_nlmsg
+00:35:43.425 [DEBUG] rustables::query: Got a valid netlink message: nlmsghdr { nlmsg_len: 36, nlmsg_type: 2, nlmsg_flags: 256, nlmsg_seq: 2, nlmsg_pid: 2670255607 } Error(nlmsgerr { error: 0, msg: nlmsghdr { nlmsg_len: 92, nlmsg_type: 2563, nlmsg_flags: 1029, nlmsg_seq: 2, nlmsg_pid: 0 } })
+00:35:43.425 [DEBUG] rustables::query: Calling parse_nlmsg
+00:35:43.425 [DEBUG] rustables::query: Got a valid netlink message: nlmsghdr { nlmsg_len: 36, nlmsg_type: 2, nlmsg_flags: 256, nlmsg_seq: 3, nlmsg_pid: 2670255607 } Error(nlmsgerr { error: 0, msg: nlmsghdr { nlmsg_len: 276, nlmsg_type: 2566, nlmsg_flags: 3077, nlmsg_seq: 3, nlmsg_pid: 0 } })
+00:35:43.425 [DEBUG] firewall_rs::firewall::nftables: Fetching existing tables
+00:35:43.425 [DEBUG] rustables::query: Listing objects of kind 1
+00:35:43.425 [DEBUG] rustables::query: Calling parse_nlmsg
+00:35:43.425 [DEBUG] rustables::query: Got a valid netlink message: nlmsghdr { nlmsg_len: 64, nlmsg_type: 2560, nlmsg_flags: 2, nlmsg_seq: 0, nlmsg_pid: 3958920927 } NfGenMsg(nfgenmsg { nfgen_family: 1, version: 0, res_id: 1024 }, [15, 0, 1, 0, 116, 101, 115, 116, 45, 116, 97, 98, 108, 101, 0, 0, 8, 0, 3, 0, 0, 0, 0, 1, 12, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0, 2, 8, 0, 2, 0, 0, 0, 0, 0])
+00:35:43.425 [DEBUG] rustables::query: Calling Object::deserialize()
+00:35:43.425 [DEBUG] rustables::parser: parse_object() started
+00:35:43.425 [DEBUG] rustables::parser: Calling <rustables::table::Table as NfNetlinkDeserialize>::deserialize()
+00:35:43.425 [DEBUG] rustables::table: Decoding attribute 1 in type rustables::table::Table
+00:35:43.425 [DEBUG] rustables::table: Calling alloc::string::String::deserialize()
+00:35:43.425 [DEBUG] rustables::table: Decoding attribute 3 in type rustables::table::Table
+00:35:43.425 [INFO] rustables::parser: Ignoring unsupported attribute type 3 for type rustables::table::Table
+00:35:43.425 [DEBUG] rustables::table: Decoding attribute 4 in type rustables::table::Table
+00:35:43.425 [INFO] rustables::parser: Ignoring unsupported attribute type 4 for type rustables::table::Table
+00:35:43.425 [DEBUG] rustables::table: Decoding attribute 2 in type rustables::table::Table
+00:35:43.425 [DEBUG] rustables::table: Calling u32::deserialize()
+00:35:43.426 [DEBUG] rustables::query: Calling parse_nlmsg
+00:35:43.426 [DEBUG] rustables::query: Got a valid netlink message: nlmsghdr { nlmsg_len: 20, nlmsg_type: 3, nlmsg_flags: 2, nlmsg_seq: 0, nlmsg_pid: 3958920927 } Done
+00:35:43.426 [DEBUG] firewall_rs::firewall::nftables: 1 table or tables found
+00:35:43.426 [DEBUG] firewall_rs::firewall::nftables: tables: [Table { name: Some("test-table"), flags: Some(0), userdata: None, family: Inet }]
+00:35:43.426 [DEBUG] firewall_rs::firewall::nftables: Processing table: 0
+00:35:43.426 [DEBUG] rustables::query: Listing objects of kind 4
+00:35:43.426 [DEBUG] rustables::query: Calling parse_nlmsg
+00:35:43.426 [DEBUG] rustables::query: Got a valid netlink message: nlmsghdr { nlmsg_len: 120, nlmsg_type: 2563, nlmsg_flags: 2, nlmsg_seq: 0, nlmsg_pid: 2828680742 } NfGenMsg(nfgenmsg { nfgen_family: 1, version: 0, res_id: 1024 }, [15, 0, 1, 0, 116, 101, 115, 116, 45, 116, 97, 98, 108, 101, 0, 0, 15, 0, 3, 0, 116, 101, 115, 116, 45, 99, 104, 97, 105, 110, 0, 0, 12, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 1, 20, 0, 4, 0, 8, 0, 1, 0, 0, 0, 0, 1, 8, 0, 2, 0, 0, 0, 0, 3, 8, 0, 5, 0, 0, 0, 0, 1, 11, 0, 7, 0, 102, 105, 108, 116, 101, 114, 0, 0, 8, 0, 10, 0, 0, 0, 0, 1, 8, 0, 6, 0, 0, 0, 0, 1])
+00:35:43.426 [DEBUG] rustables::query: Calling Object::deserialize()
+00:35:43.426 [DEBUG] rustables::parser: parse_object() started
+00:35:43.426 [DEBUG] rustables::parser: Calling <rustables::chain::Chain as NfNetlinkDeserialize>::deserialize()
+00:35:43.426 [DEBUG] rustables::chain: Decoding attribute 1 in type rustables::chain::Chain
+00:35:43.426 [DEBUG] rustables::chain: Calling alloc::string::String::deserialize()
+00:35:43.426 [DEBUG] rustables::chain: Decoding attribute 3 in type rustables::chain::Chain
+00:35:43.427 [DEBUG] rustables::chain: Calling alloc::string::String::deserialize()
+00:35:43.427 [DEBUG] rustables::chain: Decoding attribute 2 in type rustables::chain::Chain
+00:35:43.427 [INFO] rustables::parser: Ignoring unsupported attribute type 2 for type rustables::chain::Chain
+00:35:43.427 [DEBUG] rustables::chain: Decoding attribute 4 in type rustables::chain::Chain
+00:35:43.427 [DEBUG] rustables::chain: Calling rustables::chain::Hook::deserialize()
+00:35:43.427 [DEBUG] rustables::parser: Calling <rustables::chain::Hook as NfNetlinkDeserialize>::deserialize()
+00:35:43.427 [DEBUG] rustables::chain: Decoding attribute 1 in type rustables::chain::Hook
+00:35:43.427 [DEBUG] rustables::chain: Calling u32::deserialize()
+00:35:43.427 [DEBUG] rustables::chain: Decoding attribute 2 in type rustables::chain::Hook
+00:35:43.427 [DEBUG] rustables::chain: Calling u32::deserialize()
+00:35:43.427 [DEBUG] rustables::chain: Decoding attribute 5 in type rustables::chain::Chain
+00:35:43.427 [DEBUG] rustables::chain: Calling rustables::chain::ChainPolicy::deserialize()
+00:35:43.427 [DEBUG] rustables::chain: Decoding attribute 7 in type rustables::chain::Chain
+00:35:43.427 [DEBUG] rustables::chain: Calling rustables::chain::ChainType::deserialize()
+00:35:43.427 [DEBUG] rustables::chain: Decoding attribute 10 in type rustables::chain::Chain
+00:35:43.427 [DEBUG] rustables::chain: Calling u32::deserialize()
+00:35:43.427 [DEBUG] rustables::chain: Decoding attribute 6 in type rustables::chain::Chain
+00:35:43.427 [INFO] rustables::parser: Ignoring unsupported attribute type 6 for type rustables::chain::Chain
+00:35:43.427 [DEBUG] rustables::query: Calling parse_nlmsg
+00:35:43.427 [DEBUG] rustables::query: Got a valid netlink message: nlmsghdr { nlmsg_len: 20, nlmsg_type: 3, nlmsg_flags: 2, nlmsg_seq: 0, nlmsg_pid: 2828680742 } Done
+00:35:43.427 [DEBUG] firewall_rs::firewall::nftables: Processing chain 0 for table 0
+00:35:43.427 [DEBUG] rustables::query: Listing objects of kind 7
+00:35:43.427 [DEBUG] rustables::rule: writing attribute table - "test-table"
+00:35:43.427 [DEBUG] rustables::rule: writing attribute chain - "test-chain"
+00:35:43.427 [DEBUG] rustables::query: Calling parse_nlmsg
+00:35:43.427 [DEBUG] rustables::query: Got a valid netlink message: nlmsghdr { nlmsg_len: 292, nlmsg_type: 2566, nlmsg_flags: 2050, nlmsg_seq: 0, nlmsg_pid: 2262087017 } NfGenMsg(nfgenmsg { nfgen_family: 1, version: 0, res_id: 1024 }, [15, 0, 1, 0, 116, 101, 115, 116, 45, 116, 97, 98, 108, 101, 0, 0, 15, 0, 2, 0, 116, 101, 115, 116, 45, 99, 104, 97, 105, 110, 0, 0, 12, 0, 3, 0, 0, 0, 0, 0, 0, 0, 0, 2, 228, 0, 4, 0, 36, 0, 1, 0, 9, 0, 1, 0, 109, 101, 116, 97, 0, 0, 0, 0, 20, 0, 2, 0, 8, 0, 2, 0, 0, 0, 0, 15, 8, 0, 1, 0, 0, 0, 0, 1, 44, 0, 1, 0, 8, 0, 1, 0, 99, 109, 112, 0, 32, 0, 2, 0, 8, 0, 1, 0, 0, 0, 0, 1, 8, 0, 2, 0, 0, 0, 0, 0, 12, 0, 3, 0, 5, 0, 1, 0, 2, 0, 0, 0, 52, 0, 1, 0, 12, 0, 1, 0, 112, 97, 121, 108, 111, 97, 100, 0, 36, 0, 2, 0, 8, 0, 1, 0, 0, 0, 0, 1, 8, 0, 2, 0, 0, 0, 0, 1, 8, 0, 3, 0, 0, 0, 0, 12, 8, 0, 4, 0, 0, 0, 0, 4, 44, 0, 1, 0, 8, 0, 1, 0, 99, 109, 112, 0, 32, 0, 2, 0, 8, 0, 1, 0, 0, 0, 0, 1, 8, 0, 2, 0, 0, 0, 0, 0, 12, 0, 3, 0, 8, 0, 1, 0, 127, 0, 0, 1, 48, 0, 1, 0, 14, 0, 1, 0, 105, 109, 109, 101, 100, 105, 97, 116, 101, 0, 0, 0, 28, 0, 2, 0, 8, 0, 1, 0, 0, 0, 0, 0, 16, 0, 2, 0, 12, 0, 2, 0, 8, 0, 1, 0, 0, 0, 0, 1])
+00:35:43.429 [DEBUG] rustables::query: Calling Object::deserialize()
+00:35:43.429 [DEBUG] rustables::parser: parse_object() started
+00:35:43.429 [DEBUG] rustables::parser: Calling <rustables::rule::Rule as NfNetlinkDeserialize>::deserialize()
+00:35:43.429 [DEBUG] rustables::rule: Decoding attribute 1 in type rustables::rule::Rule
+00:35:43.429 [DEBUG] rustables::rule: Calling alloc::string::String::deserialize()
+00:35:43.429 [DEBUG] rustables::rule: Decoding attribute 2 in type rustables::rule::Rule
+00:35:43.429 [DEBUG] rustables::rule: Calling alloc::string::String::deserialize()
+00:35:43.429 [DEBUG] rustables::rule: Decoding attribute 3 in type rustables::rule::Rule
+00:35:43.429 [DEBUG] rustables::rule: Calling u64::deserialize()
+00:35:43.429 [DEBUG] rustables::rule: Decoding attribute 4 in type rustables::rule::Rule
+00:35:43.429 [DEBUG] rustables::rule: Calling rustables::parser_impls::NfNetlinkList<rustables::expr::RawExpression>::deserialize()
+00:35:43.429 [DEBUG] rustables::parser: Calling <rustables::expr::RawExpression as NfNetlinkDeserialize>::deserialize()
+00:35:43.429 [DEBUG] rustables::expr: Decoding attribute 1 in an expression
+00:35:43.429 [DEBUG] rustables::expr: Calling alloc::string::String::deserialize()
+00:35:43.429 [DEBUG] rustables::expr: Decoding attribute 2 in an expression
+00:35:43.429 [DEBUG] rustables::expr: Calling rustables::expr::meta::Meta::deserialize()
+00:35:43.429 [DEBUG] rustables::parser: Calling <rustables::expr::meta::Meta as NfNetlinkDeserialize>::deserialize()
+00:35:43.429 [DEBUG] rustables::expr::meta: Decoding attribute 2 in type rustables::expr::meta::Meta
+00:35:43.429 [DEBUG] rustables::expr::meta: Calling rustables::expr::meta::MetaType::deserialize()
+00:35:43.429 [DEBUG] rustables::expr::meta: Decoding attribute 1 in type rustables::expr::meta::Meta
+00:35:43.429 [DEBUG] rustables::expr::meta: Calling rustables::expr::register::Register::deserialize()
+00:35:43.429 [DEBUG] rustables::parser: Calling <rustables::expr::RawExpression as NfNetlinkDeserialize>::deserialize()
+00:35:43.429 [DEBUG] rustables::expr: Decoding attribute 1 in an expression
+00:35:43.429 [DEBUG] rustables::expr: Calling alloc::string::String::deserialize()
+00:35:43.429 [DEBUG] rustables::expr: Decoding attribute 2 in an expression
+00:35:43.429 [DEBUG] rustables::expr: Calling rustables::expr::cmp::Cmp::deserialize()
+00:35:43.429 [DEBUG] rustables::parser: Calling <rustables::expr::cmp::Cmp as NfNetlinkDeserialize>::deserialize()
+00:35:43.429 [DEBUG] rustables::expr::cmp: Decoding attribute 1 in type rustables::expr::cmp::Cmp
+00:35:43.429 [DEBUG] rustables::expr::cmp: Calling rustables::expr::register::Register::deserialize()
+00:35:43.429 [DEBUG] rustables::expr::cmp: Decoding attribute 2 in type rustables::expr::cmp::Cmp
+00:35:43.429 [DEBUG] rustables::expr::cmp: Calling rustables::expr::cmp::CmpOp::deserialize()
+00:35:43.429 [DEBUG] rustables::expr::cmp: Decoding attribute 3 in type rustables::expr::cmp::Cmp
+00:35:43.429 [DEBUG] rustables::expr::cmp: Calling rustables::parser_impls::NfNetlinkData::deserialize()
+00:35:43.429 [DEBUG] rustables::parser: Calling <rustables::parser_impls::NfNetlinkData as NfNetlinkDeserialize>::deserialize()
+00:35:43.429 [DEBUG] rustables::parser_impls: Decoding attribute 1 in type rustables::parser_impls::NfNetlinkData
+00:35:43.430 [DEBUG] rustables::parser_impls: Calling alloc::vec::Vec<u8>::deserialize()
+00:35:43.430 [DEBUG] rustables::parser: Calling <rustables::expr::RawExpression as NfNetlinkDeserialize>::deserialize()
+00:35:43.430 [DEBUG] rustables::expr: Decoding attribute 1 in an expression
+00:35:43.430 [DEBUG] rustables::expr: Calling alloc::string::String::deserialize()
+00:35:43.430 [DEBUG] rustables::expr: Decoding attribute 2 in an expression
+00:35:43.430 [DEBUG] rustables::expr: Calling rustables::expr::payload::Payload::deserialize()
+00:35:43.430 [DEBUG] rustables::parser: Calling <rustables::expr::payload::Payload as NfNetlinkDeserialize>::deserialize()
+00:35:43.430 [DEBUG] rustables::expr::payload: Decoding attribute 1 in type rustables::expr::payload::Payload
+00:35:43.430 [DEBUG] rustables::expr::payload: Calling rustables::expr::register::Register::deserialize()
+00:35:43.430 [DEBUG] rustables::expr::payload: Decoding attribute 2 in type rustables::expr::payload::Payload
+00:35:43.430 [DEBUG] rustables::expr::payload: Calling u32::deserialize()
+00:35:43.430 [DEBUG] rustables::expr::payload: Decoding attribute 3 in type rustables::expr::payload::Payload
+00:35:43.430 [DEBUG] rustables::expr::payload: Calling u32::deserialize()
+00:35:43.430 [DEBUG] rustables::expr::payload: Decoding attribute 4 in type rustables::expr::payload::Payload
+00:35:43.430 [DEBUG] rustables::expr::payload: Calling u32::deserialize()
+00:35:43.430 [DEBUG] rustables::parser: Calling <rustables::expr::RawExpression as NfNetlinkDeserialize>::deserialize()
+00:35:43.430 [DEBUG] rustables::expr: Decoding attribute 1 in an expression
+00:35:43.430 [DEBUG] rustables::expr: Calling alloc::string::String::deserialize()
+00:35:43.430 [DEBUG] rustables::expr: Decoding attribute 2 in an expression
+00:35:43.430 [DEBUG] rustables::expr: Calling rustables::expr::cmp::Cmp::deserialize()
+00:35:43.430 [DEBUG] rustables::parser: Calling <rustables::expr::cmp::Cmp as NfNetlinkDeserialize>::deserialize()
+00:35:43.430 [DEBUG] rustables::expr::cmp: Decoding attribute 1 in type rustables::expr::cmp::Cmp
+00:35:43.430 [DEBUG] rustables::expr::cmp: Calling rustables::expr::register::Register::deserialize()
+00:35:43.430 [DEBUG] rustables::expr::cmp: Decoding attribute 2 in type rustables::expr::cmp::Cmp
+00:35:43.430 [DEBUG] rustables::expr::cmp: Calling rustables::expr::cmp::CmpOp::deserialize()
+00:35:43.430 [DEBUG] rustables::expr::cmp: Decoding attribute 3 in type rustables::expr::cmp::Cmp
+00:35:43.430 [DEBUG] rustables::expr::cmp: Calling rustables::parser_impls::NfNetlinkData::deserialize()
+00:35:43.430 [DEBUG] rustables::parser: Calling <rustables::parser_impls::NfNetlinkData as NfNetlinkDeserialize>::deserialize()
+00:35:43.430 [DEBUG] rustables::parser_impls: Decoding attribute 1 in type rustables::parser_impls::NfNetlinkData
+00:35:43.430 [DEBUG] rustables::parser_impls: Calling alloc::vec::Vec<u8>::deserialize()
+00:35:43.430 [DEBUG] rustables::parser: Calling <rustables::expr::RawExpression as NfNetlinkDeserialize>::deserialize()
+00:35:43.430 [DEBUG] rustables::expr: Decoding attribute 1 in an expression
+00:35:43.430 [DEBUG] rustables::expr: Calling alloc::string::String::deserialize()
+00:35:43.430 [DEBUG] rustables::expr: Decoding attribute 2 in an expression
+00:35:43.431 [DEBUG] rustables::expr: Calling rustables::expr::immediate::Immediate::deserialize()
+00:35:43.431 [DEBUG] rustables::parser: Calling <rustables::expr::immediate::Immediate as NfNetlinkDeserialize>::deserialize()
+00:35:43.431 [DEBUG] rustables::expr::immediate: Decoding attribute 1 in type rustables::expr::immediate::Immediate
+00:35:43.431 [DEBUG] rustables::expr::immediate: Calling rustables::expr::register::Register::deserialize()
+00:35:43.431 [DEBUG] rustables::expr::immediate: Decoding attribute 2 in type rustables::expr::immediate::Immediate
+00:35:43.431 [DEBUG] rustables::expr::immediate: Calling rustables::parser_impls::NfNetlinkData::deserialize()
+00:35:43.431 [DEBUG] rustables::parser: Calling <rustables::parser_impls::NfNetlinkData as NfNetlinkDeserialize>::deserialize()
+00:35:43.431 [DEBUG] rustables::parser_impls: Decoding attribute 2 in type rustables::parser_impls::NfNetlinkData
+00:35:43.431 [DEBUG] rustables::parser_impls: Calling rustables::expr::verdict::Verdict::deserialize()
+00:35:43.431 [DEBUG] rustables::parser: Calling <rustables::expr::verdict::Verdict as NfNetlinkDeserialize>::deserialize()
+00:35:43.431 [DEBUG] rustables::expr::verdict: Decoding attribute 1 in type rustables::expr::verdict::Verdict
+00:35:43.431 [DEBUG] rustables::expr::verdict: Calling rustables::expr::verdict::VerdictType::deserialize()
+00:35:43.431 [DEBUG] rustables::query: Calling parse_nlmsg
+00:35:43.431 [DEBUG] rustables::query: Got a valid netlink message: nlmsghdr { nlmsg_len: 20, nlmsg_type: 3, nlmsg_flags: 2, nlmsg_seq: 0, nlmsg_pid: 2262087017 } Done
+00:35:43.431 [DEBUG] firewall_rs::firewall::nftables: Expressions for rule: Ok(NfNetlinkList { objs: [RawExpression { name: Some("meta"), data: Some(Meta(Meta { dreg: Some(Reg1), key: Some(NfProto), sreg: None })) }, RawExpression { name: Some("cmp"), data: Some(Cmp(Cmp { sreg: Some(Reg1), op: Some(Eq), data: Some(NfNetlinkData { value: Some([2]), verdict: None }) })) }, RawExpression { name: Some("payload"), data: Some(Payload(Payload { dreg: Some(Reg1), base: Some(1), offset: Some(12), len: Some(4), sreg: None })) }, RawExpression { name: Some("cmp"), data: Some(Cmp(Cmp { sreg: Some(Reg1), op: Some(Eq), data: Some(NfNetlinkData { value: Some([127, 0, 0, 1]), verdict: None }) })) }, RawExpression { name: Some("immediate"), data: Some(Immediate(Immediate { dreg: Some(Verdict), data: Some(NfNetlinkData { value: None, verdict: Some(Verdict { code: Some(Accept), chain: None, chain_id: None }) }) })) }] })
+00:35:43.432 [DEBUG] firewall_rs::firewall::nftables: expression: NfNetlinkList { objs: [RawExpression { name: Some("meta"), data: Some(Meta(Meta { dreg: Some(Reg1), key: Some(NfProto), sreg: None })) }, RawExpression { name: Some("cmp"), data: Some(Cmp(Cmp { sreg: Some(Reg1), op: Some(Eq), data: Some(NfNetlinkData { value: Some([2]), verdict: None }) })) }, RawExpression { name: Some("payload"), data: Some(Payload(Payload { dreg: Some(Reg1), base: Some(1), offset: Some(12), len: Some(4), sreg: None })) }, RawExpression { name: Some("cmp"), data: Some(Cmp(Cmp { sreg: Some(Reg1), op: Some(Eq), data: Some(NfNetlinkData { value: Some([127, 0, 0, 1]), verdict: None }) })) }, RawExpression { name: Some("immediate"), data: Some(Immediate(Immediate { dreg: Some(Verdict), data: Some(NfNetlinkData { value: None, verdict: Some(Verdict { code: Some(Accept), chain: None, chain_id: None }) }) })) }] }
+00:35:43.432 [DEBUG] firewall_rs::firewall::nftables: Userdata for rule: Err("No userdata")
+00:35:43.432 [DEBUG] rustables::query: Listing objects of kind 1
+00:35:43.432 [DEBUG] rustables::query: Calling parse_nlmsg
+00:35:43.433 [DEBUG] rustables::query: Got a valid netlink message: nlmsghdr { nlmsg_len: 64, nlmsg_type: 2560, nlmsg_flags: 2, nlmsg_seq: 0, nlmsg_pid: 2698564704 } NfGenMsg(nfgenmsg { nfgen_family: 1, version: 0, res_id: 1024 }, [15, 0, 1, 0, 116, 101, 115, 116, 45, 116, 97, 98, 108, 101, 0, 0, 8, 0, 3, 0, 0, 0, 0, 1, 12, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0, 2, 8, 0, 2, 0, 0, 0, 0, 0])
+00:35:43.433 [DEBUG] rustables::query: Calling Object::deserialize()
+00:35:43.433 [DEBUG] rustables::parser: parse_object() started
+00:35:43.433 [DEBUG] rustables::parser: Calling <rustables::table::Table as NfNetlinkDeserialize>::deserialize()
+00:35:43.433 [DEBUG] rustables::table: Decoding attribute 1 in type rustables::table::Table
+00:35:43.433 [DEBUG] rustables::table: Calling alloc::string::String::deserialize()
+00:35:43.433 [DEBUG] rustables::table: Decoding attribute 3 in type rustables::table::Table
+00:35:43.433 [INFO] rustables::parser: Ignoring unsupported attribute type 3 for type rustables::table::Table
+00:35:43.433 [DEBUG] rustables::table: Decoding attribute 4 in type rustables::table::Table
+00:35:43.433 [INFO] rustables::parser: Ignoring unsupported attribute type 4 for type rustables::table::Table
+00:35:43.433 [DEBUG] rustables::table: Decoding attribute 2 in type rustables::table::Table
+00:35:43.433 [DEBUG] rustables::table: Calling u32::deserialize()
+00:35:43.433 [DEBUG] rustables::query: Calling parse_nlmsg
+00:35:43.433 [DEBUG] rustables::query: Got a valid netlink message: nlmsghdr { nlmsg_len: 20, nlmsg_type: 3, nlmsg_flags: 2, nlmsg_seq: 0, nlmsg_pid: 2698564704 } Done
+00:35:43.433 [DEBUG] firewall_rs::firewall::nftables: deleting Ok("test-table") table
+00:35:43.433 [DEBUG] rustables::table: writing attribute name - "test-table"
+00:35:43.433 [DEBUG] rustables::table: writing attribute flags - 0
+00:35:43.433 [DEBUG] rustables::query: Calling parse_nlmsg
+00:35:43.433 [DEBUG] rustables::query: Got a valid netlink message: nlmsghdr { nlmsg_len: 36, nlmsg_type: 2, nlmsg_flags: 256, nlmsg_seq: 0, nlmsg_pid: 2998072335 } Error(nlmsgerr { error: 0, msg: nlmsghdr { nlmsg_len: 20, nlmsg_type: 16, nlmsg_flags: 5, nlmsg_seq: 0, nlmsg_pid: 0 } })
+00:35:43.434 [DEBUG] rustables::query: Calling parse_nlmsg
+00:35:43.434 [DEBUG] rustables::query: Got a valid netlink message: nlmsghdr { nlmsg_len: 36, nlmsg_type: 2, nlmsg_flags: 256, nlmsg_seq: 1, nlmsg_pid: 2998072335 } Error(nlmsgerr { error: 0, msg: nlmsghdr { nlmsg_len: 44, nlmsg_type: 2562, nlmsg_flags: 5, nlmsg_seq: 1, nlmsg_pid: 0 } })
+00:35:43.457 [DEBUG] firewall_rs: CLI exited
+00:35:43.457 [INFO] cli_log::mem: Physical mem usage: current=5.7M, peak=1.0G

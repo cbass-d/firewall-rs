@@ -11,9 +11,9 @@ pub struct AppContext {
 }
 
 impl AppContext {
-    pub fn new(ruleset: RuleSet) -> Self {
+    pub fn new() -> Self {
         Self {
-            ruleset,
+            ruleset: RuleSet::default(),
             packet_log: VecDeque::new(),
             active_box: ActiveBox::None,
         }
