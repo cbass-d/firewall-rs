@@ -2,7 +2,8 @@ use super::rules::RuleSet;
 use anyhow::Result;
 use cli_log::debug;
 use rustables::{
-    Batch, Chain, ChainPolicy, ChainType, Hook, HookClass, MsgType, ProtocolFamily, Rule, Table,
+    Batch, Chain, ChainPolicy, ChainPriority, ChainType, Hook, HookClass, MsgType, ProtocolFamily,
+    ProtocolFamily, Rule, Table, expr::ExpressionList,
 };
 
 const CHAIN_NAME: &str = "some-chain-name";
@@ -12,22 +13,42 @@ const LOG_NAME: &str = "log-name";
 const TEST_TABLE: &str = "test-table";
 const TEST_CHAIN: &str = "test-chain";
 
-pub fn get_tables() {
+pub struct FirewallRule {
+    protocol: ProtocolFamily,
+    expressions: ExpressionList,
+}
+
+pub struct FirewallChain {
+    name: String,
+    chain_type: ChainType,
+    hook_class: HookClass,
+    priority: ChainPriority,
+    policy: ChainPolicy,
+    rules: Vec<FirewallRule>,
+}
+
+pub struct FirewallTable {
+    name: String,
+    protocol: ProtocolFamily,
+    chains: Vec<FirewallChain>,
+}
+
+pub fn get_tables() -> Vec<Table> {
     debug!("Fetching existing tables");
 
     let mut tables = rustables::list_tables().unwrap();
 
     if tables.is_empty() {
         debug!("No tables to process");
-        return;
+        return vec![];
     }
 
     debug!("{} table or tables found", tables.len());
-    debug!("tables: {:?}", tables);
     let mut table_idx: usize = 0;
     tables.iter().for_each(|t| {
         debug!("Processing table: {}", table_idx);
 
+        let firewall_chains: Vec<FirewallChain> = Vec::new();
         let chains = rustables::list_chains_for_table(&t).unwrap();
 
         let mut chain_idx: usize = 0;
@@ -40,13 +61,16 @@ pub fn get_tables() {
 
         table_idx += 1;
     });
+
     //tables.iter().map(|t| {
     //    debug!("Processing table: {}", idx);
     //    idx += 1;
     //});
+
+    tables
 }
 
-pub fn process_chain(chain: &Chain) {
+pub fn process_chain(chain: &Chain) -> FirewallChain {
     let rules = rustables::list_rules_for_chain(chain).unwrap();
 
     rules.iter().for_each(|r| {
@@ -54,7 +78,7 @@ pub fn process_chain(chain: &Chain) {
     });
 }
 
-pub fn process_rule(rule: &Rule) {
+pub fn process_rule(rule: &Rule) -> FirewallRule {
     let expressions = rule.get_expressions().ok_or("No expressions");
     let userdata = rule.get_userdata().ok_or("No userdata");
 

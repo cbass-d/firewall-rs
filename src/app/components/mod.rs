@@ -4,6 +4,7 @@ use ratatui::{Frame, layout::Rect, style::Color};
 use tokio::sync::mpsc::{self};
 
 pub mod animation;
+pub mod chains_list;
 pub mod edit_page;
 pub mod help_page;
 pub mod packet_log;

@@ -36,6 +36,7 @@ pub enum ActiveBox {
     PacketLog,
     HelpPage,
     EditPage,
+    ChainsList,
 }
 
 pub struct App {

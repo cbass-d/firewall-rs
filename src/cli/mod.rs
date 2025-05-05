@@ -21,23 +21,23 @@ pub async fn run() -> Result<()> {
 
     let (shutdown_tx, shutdown_rx) = broadcast::channel::<()>(1);
 
-    //let mut task_set = JoinSet::new();
+    let mut task_set = JoinSet::new();
 
-    //// Spawn engine task in blocking thread pool
-    //// allows for processing of packets while allowing
-    //// the app task to run
-    //task_set.spawn(async move {
-    //    tokio::task::spawn_blocking(move || engine.run(shutdown_rx)).await;
-    //});
+    // Spawn engine task in blocking thread pool
+    // allows for processing of packets while allowing
+    // the app task to run
+    task_set.spawn(async move {
+        tokio::task::spawn_blocking(move || engine.run(shutdown_rx)).await;
+    });
 
-    //task_set.spawn(async move {
-    //    //app.run(context).await;
-    //    shutdown_tx.send(());
-    //});
+    task_set.spawn(async move {
+        app.run(context).await;
+        shutdown_tx.send(());
+    });
 
-    //while let Some(res) = task_set.join_next().await {
-    //    debug!("{res:?}");
-    //}
+    while let Some(res) = task_set.join_next().await {
+        debug!("{res:?}");
+    }
 
     Ok(())
 }

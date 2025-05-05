@@ -1,5 +1,3 @@
-use std::collections::HashSet;
-
 use super::{Action, AppContext, Component, ComponentRender, Props};
 use crate::firewall::rules::{FirewallAction, Rule, RuleSet};
 use crate::format_rule_fields;
@@ -15,11 +13,10 @@ use ratatui::{
         Table, TableState, Tabs,
     },
 };
+use std::collections::HashSet;
 use tokio::sync::mpsc::{self};
 
 pub struct RulesList {
-    active_rules: RuleSet,
-    expanded: HashSet<usize>,
     current_tab: usize,
     action_tx: mpsc::UnboundedSender<Action>,
 }
@@ -45,14 +42,7 @@ impl RulesList {
         self.current_tab = self.current_tab.saturating_sub(1);
     }
 
-    fn get_current_rule_set(&self) -> &Rule {
-        match self.current_tab {
-            0 => &self.active_rules.allow,
-            1 => &self.active_rules.deny,
-            2 => &self.active_rules.log,
-            _ => &self.active_rules.log,
-        }
-    }
+    fn format_rules(&mut self) {}
 }
 
 impl Component for RulesList {
@@ -61,9 +51,7 @@ impl Component for RulesList {
         Self: Sized,
     {
         Self {
-            active_rules: context.ruleset.clone(),
             current_tab: 0,
-            expanded: HashSet::new(),
             action_tx,
         }
     }
@@ -73,8 +61,6 @@ impl Component for RulesList {
         Self: Sized,
     {
         Self {
-            active_rules: context.ruleset.clone(),
-            expanded: self.expanded,
             current_tab: self.current_tab,
             action_tx: self.action_tx,
         }
@@ -107,7 +93,7 @@ impl ComponentRender<Props> for RulesList {
             .constraints([Constraint::Length(3), Constraint::Min(0)])
             .split(props.area);
 
-        let tabs = Tabs::new(vec!["Allow", "Log", "Deny"])
+        let tabs = Tabs::new(vec!["Tree"])
             .block(
                 Block::default()
                     .borders(Borders::all())
@@ -125,35 +111,27 @@ impl ComponentRender<Props> for RulesList {
 
         frame.render_widget(tabs, layout[0]);
 
-        let fields = [
-            "Source IPs",
-            "Destination Ips",
-            "Source Networks",
-            "Destination Networks",
-            "Source Ports",
-            "Destination Ports",
-        ];
+        //       let fields = [
+        //           "Source IPs",
+        //           "Destination Ips",
+        //           "Source Networks",
+        //           "Destination Networks",
+        //           "Source Ports",
+        //           "Destination Ports",
+        //       ];
 
-        let rule = self.get_current_rule_set();
-        let values = [
-            format_rule_set(&rule.sources),
-            format_rule_set(&rule.destinations),
-            format_rule_set(&rule.source_networks),
-            format_rule_set(&rule.destination_networks),
-            format_rule_set(&rule.sports),
-            format_rule_set(&rule.dports),
-        ];
+        //        let values = [];
 
-        let rows: Vec<Row> = fields
-            .iter()
-            .zip(values.iter())
-            .enumerate()
-            .map(|(i, (name, value))| Row::new(vec![Cell::from(*name), Cell::from(value.as_str())]))
-            .collect();
+        //        let rows: Vec<Row> = fields
+        //            .iter()
+        //            .zip(values.iter())
+        //            .enumerate()
+        //            .map(|(i, (name, value))| Row::new(vec![Cell::from(*name), Cell::from(value.as_str())]))
+        //            .collect();
+        //
+        //        let table =
+        //            Table::new(rows, [Constraint::Min(0), Constraint::Min(0)]).block(Block::default());
 
-        let table =
-            Table::new(rows, [Constraint::Min(0), Constraint::Min(0)]).block(Block::default());
-
-        frame.render_widget(table, layout[1]);
+        //        frame.render_widget(table, layout[1]);
     }
 }

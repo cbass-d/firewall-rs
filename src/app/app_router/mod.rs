@@ -1,8 +1,8 @@
 use super::{
     ActiveBox,
     components::{
-        Component, ComponentRender, Props, animation::Animation, edit_page::EditPage,
-        help_page::HelpPage, packet_log::PacketLog, rules_list::RulesList,
+        Component, ComponentRender, Props, animation::Animation, chains_list::ChainsList,
+        edit_page::EditPage, help_page::HelpPage, packet_log::PacketLog, rules_list::RulesList,
     },
     context::AppContext,
     ui::Action,
@@ -20,6 +20,7 @@ use tokio::sync::mpsc::{self};
 pub struct AppRouter {
     active_box: ActiveBox,
     rules_list: RulesList,
+    chains_list: ChainsList,
     edit_page: EditPage,
     pub animation: Animation,
     packet_log: PacketLog,
@@ -36,6 +37,7 @@ impl Component for AppRouter {
             active_box: context.active_box,
             animation: Animation::new(context, action_tx.clone()),
             rules_list: RulesList::new(context, action_tx.clone()),
+            chains_list: ChainsList::new(context, action_tx.clone()),
             packet_log: PacketLog::new(context, action_tx.clone()),
             edit_page: EditPage::new(context, action_tx.clone()),
             help_page: HelpPage::new(context, action_tx.clone()),
@@ -52,6 +54,7 @@ impl Component for AppRouter {
             active_box: context.active_box,
             animation: self.animation.update(context),
             rules_list: self.rules_list.update(context),
+            chains_list: self.chains_list.update(context),
             packet_log: self.packet_log.update(context),
             help_page: self.help_page.update(context),
             edit_page: self.edit_page.update(context),
@@ -67,6 +70,9 @@ impl Component for AppRouter {
         match self.active_box {
             ActiveBox::RulesList => {
                 self.rules_list.handle_key_event(key);
+            }
+            ActiveBox::ChainsList => {
+                self.chains_list.handle_key_event(key);
             }
             ActiveBox::PacketLog => {
                 self.packet_log.handle_key_event(key);
@@ -126,6 +132,10 @@ impl ComponentRender<()> for AppRouter {
                 text.push_str(" esc - back ");
                 text.push_str(" enter - expand ");
                 text.push_str(" e - edit ");
+                text.push_str(" ? - help ");
+            }
+            ActiveBox::ChainsList => {
+                text.push_str(" esc - back ");
                 text.push_str(" ? - help ");
             }
             ActiveBox::EditPage => {
