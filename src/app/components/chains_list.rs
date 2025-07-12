@@ -1,5 +1,5 @@
 use super::{Action, AppContext, Component, ComponentRender, Props};
-use crate::firewall::nftables::{self};
+use crate::netlink::{self};
 use crossterm::event::{KeyCode, KeyEvent};
 use ratatui::{
     Frame,

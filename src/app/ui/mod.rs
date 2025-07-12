@@ -1,13 +1,13 @@
 use super::EventHandler;
-use crate::firewall::rules::FirewallAction;
 use tokio::sync::mpsc::{self};
 
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Debug)]
 pub enum Action {
     Quit,
     Return,
-    SelectRulesList,
+    SelectTableList,
     SelectPacketLog,
+    AttachListener(String),
     DisplayHelp,
     EditRules,
 }

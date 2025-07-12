@@ -1,13 +1,8 @@
-use super::{debug, error, log};
+use super::debug;
 use anyhow::{Result, anyhow};
 use crossterm::event::KeyEvent;
 use futures::{FutureExt, StreamExt};
-use ratatui::prelude::*;
-use std::{
-    fs::read,
-    io::{self, Stdout},
-    time::Duration,
-};
+use std::time::Duration;
 use tokio::sync::mpsc::{self};
 
 pub enum Event {

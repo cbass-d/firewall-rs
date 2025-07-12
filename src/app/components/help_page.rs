@@ -42,11 +42,34 @@ impl Component for HelpPage {
 impl ComponentRender<Props> for HelpPage {
     fn render(&mut self, frame: &mut ratatui::Frame, props: Props) {
         let block = Block::new()
-            .title("Help - Commands for Terminal Interface")
+            .title("Info and Commands for Terminal Interface")
             .borders(Borders::all())
             .border_style(props.border_color)
             .padding(Padding::uniform(1));
 
-        frame.render_widget(block, props.area);
+        let firewall_rules = Paragraph::new(
+            r#"
+                r - Select firewall rules pane
+                p - Select the packet log pane
+
+                Viewing and Editing Netfilter Rules:
+                    The left hand display display the active netfilter tables.
+                    To expand the tables and show their chains press 'Enter'.
+                    To look at the rules for a chain press 'Enter'.
+
+                    e - Edit the exising netfilter tables and rules
+                
+                Packet Log of Incoming Packets:
+                    The log displays incoming packets and their status for the
+                    selected network device.
+
+                    i - List and select the network device
+                
+                This page can be displayed by pressing '?'
+            "#,
+        )
+        .block(block);
+
+        frame.render_widget(firewall_rules, props.area);
     }
 }

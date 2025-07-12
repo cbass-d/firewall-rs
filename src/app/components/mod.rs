@@ -8,7 +8,7 @@ pub mod chains_list;
 pub mod edit_page;
 pub mod help_page;
 pub mod packet_log;
-pub mod rules_list;
+pub mod tables_list;
 
 pub struct Props {
     pub area: Rect,

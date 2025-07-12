@@ -14,9 +14,13 @@ ctrlc = "3.4.6"
 dirs = "6.0.0"
 env_logger = "0.11.7"
 futures = "0.3.31"
+libc = "0.2.172"
 mnl = "0.2.2"
 nfq = "0.2.5"
+nftables = "0.6.2"
 nftnl = "0.7.0"
+nix = { version = "0.30.1", features = ["socket"] }
+pcap = "2.2.0"
 pnet = "0.35.0"
 rand = "0.9.1"
 ratatui = "0.29.0"
@@ -24,3 +28,4 @@ rustables = "0.8.6"
 serde = { version = "1.0.218", features = ["derive"] }
 tokio = { version = "1.44.1", features = ["full"] }
 toml = "0.8.20"
+tui-tree-widget = "0.23.1"

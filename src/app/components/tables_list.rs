@@ -1,13 +1,12 @@
 use super::{Action, AppContext, Component, ComponentRender, Props};
-use crate::firewall::rules::{FirewallAction, Rule, RuleSet};
-use crate::format_rule_fields;
+use crate::netlink::{self};
 use cli_log::debug;
 use crossterm::event::{KeyCode, KeyEvent};
 use ratatui::widgets::{Cell, Row};
 use ratatui::{
     prelude::*,
     style::{Color, Style},
-    text::{Line, Text},
+    text::{Line, Span, Text},
     widgets::{
         Block, Borders, HighlightSpacing, List, ListDirection, ListState, Padding, Paragraph,
         Table, TableState, Tabs,
@@ -15,13 +14,17 @@ use ratatui::{
 };
 use std::collections::HashSet;
 use tokio::sync::mpsc::{self};
+use tui_tree_widget::{Tree, TreeState};
 
-pub struct RulesList {
+pub struct TableList<usize> {
     current_tab: usize,
+    total_tabs: usize,
     action_tx: mpsc::UnboundedSender<Action>,
+    nft_tables: Vec<String>,
+    tree_state: TreeState<usize>,
 }
 
-fn format_rule_set<T: std::fmt::Display>(set: &HashSet<T>) -> String {
+fn format_rule_set<T: std::fmt::Display>(set: &HashSet<usize>) -> String {
     if set.is_empty() {
         return "Empty".to_string();
     }
@@ -32,37 +35,50 @@ fn format_rule_set<T: std::fmt::Display>(set: &HashSet<T>) -> String {
         .join(",")
 }
 
-impl RulesList {
+impl TableList<usize> {
     fn next_tab(&mut self) {
         self.current_tab = self.current_tab.saturating_add(1);
-        self.current_tab = self.current_tab.clamp(0, 2);
+        self.clamp_tab();
     }
 
     fn previous_tab(&mut self) {
         self.current_tab = self.current_tab.saturating_sub(1);
+        self.clamp_tab();
     }
 
-    fn format_rules(&mut self) {}
+    fn clamp_tab(&mut self) {
+        self.current_tab = self.current_tab.clamp(0, self.total_tabs - 1);
+    }
+
+    //fn expand_current_table(&mut self, idx: usize) {}
 }
 
-impl Component for RulesList {
-    fn new(context: &AppContext, action_tx: mpsc::UnboundedSender<Action>) -> Self
+impl Component for TableList<usize> {
+    fn new(_context: &AppContext, action_tx: mpsc::UnboundedSender<Action>) -> Self
     where
         Self: Sized,
     {
+        let table_names = netlink::get_table_names();
+
         Self {
             current_tab: 0,
+            total_tabs: 1,
+            nft_tables: table_names,
             action_tx,
+            tree_state: TreeState::default(),
         }
     }
 
-    fn update(self, context: &AppContext) -> Self
+    fn update(self, _context: &AppContext) -> Self
     where
         Self: Sized,
     {
         Self {
             current_tab: self.current_tab,
+            total_tabs: self.total_tabs,
             action_tx: self.action_tx,
+            nft_tables: self.nft_tables,
+            tree_state: self.tree_state,
         }
     }
 
@@ -75,10 +91,22 @@ impl Component for RulesList {
             KeyCode::Char('e') => {
                 let _ = self.action_tx.send(Action::EditRules);
             }
+            KeyCode::Down => {
+                self.tree_state.key_down();
+            }
+            KeyCode::Up => {
+                self.tree_state.key_up();
+            }
             KeyCode::Left => {
-                self.previous_tab();
+                self.tree_state.key_left();
             }
             KeyCode::Right => {
+                self.tree_state.key_right();
+            }
+            KeyCode::PageDown => {
+                self.previous_tab();
+            }
+            KeyCode::PageUp => {
                 self.next_tab();
             }
             _ => {}
@@ -86,7 +114,7 @@ impl Component for RulesList {
     }
 }
 
-impl ComponentRender<Props> for RulesList {
+impl ComponentRender<Props> for TableList<usize> {
     fn render(&mut self, frame: &mut ratatui::Frame, props: Props) {
         let layout = Layout::default()
             .direction(Direction::Vertical)
@@ -111,6 +139,26 @@ impl ComponentRender<Props> for RulesList {
 
         frame.render_widget(tabs, layout[0]);
 
+        if !self.nft_tables.is_empty() {
+            let tree_nodes = netlink::build_tree();
+            let tree = Tree::new(&tree_nodes)
+                .unwrap()
+                .block(
+                    Block::default()
+                        .borders(Borders::all())
+                        .border_style(props.border_color),
+                )
+                .highlight_style(Style::new().bg(Color::Green));
+
+            frame.render_stateful_widget(tree, layout[1], &mut self.tree_state);
+        } else {
+            let text = Paragraph::new("No active tables")
+                .block(Block::default())
+                .alignment(Alignment::Center);
+
+            frame.render_widget(text, layout[1]);
+        }
+
         //       let fields = [
         //           "Source IPs",
         //           "Destination Ips",
@@ -133,5 +181,6 @@ impl ComponentRender<Props> for RulesList {
         //            Table::new(rows, [Constraint::Min(0), Constraint::Min(0)]).block(Block::default());
 
         //        frame.render_widget(table, layout[1]);
+        //
     }
 }

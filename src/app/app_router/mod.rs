@@ -1,8 +1,8 @@
 use super::{
-    ActiveBox,
+    ActivePane,
     components::{
         Component, ComponentRender, Props, animation::Animation, chains_list::ChainsList,
-        edit_page::EditPage, help_page::HelpPage, packet_log::PacketLog, rules_list::RulesList,
+        edit_page::EditPage, help_page::HelpPage, packet_log::PacketLog, tables_list::TableList,
     },
     context::AppContext,
     ui::Action,
@@ -17,26 +17,26 @@ use ratatui::{
 };
 use tokio::sync::mpsc::{self};
 
-pub struct AppRouter {
-    active_box: ActiveBox,
-    rules_list: RulesList,
+pub struct AppRouter<usize> {
+    pub animation: Animation,
+    active_pane: ActivePane,
+    table_list: TableList<usize>,
     chains_list: ChainsList,
     edit_page: EditPage,
-    pub animation: Animation,
     packet_log: PacketLog,
     help_page: HelpPage,
     action_tx: mpsc::UnboundedSender<Action>,
 }
 
-impl Component for AppRouter {
+impl Component for AppRouter<usize> {
     fn new(context: &AppContext, action_tx: mpsc::UnboundedSender<Action>) -> Self
     where
         Self: Sized,
     {
         Self {
-            active_box: context.active_box,
+            active_pane: context.active_box,
             animation: Animation::new(context, action_tx.clone()),
-            rules_list: RulesList::new(context, action_tx.clone()),
+            table_list: TableList::new(context, action_tx.clone()),
             chains_list: ChainsList::new(context, action_tx.clone()),
             packet_log: PacketLog::new(context, action_tx.clone()),
             edit_page: EditPage::new(context, action_tx.clone()),
@@ -49,11 +49,10 @@ impl Component for AppRouter {
     where
         Self: Sized,
     {
-        debug!("Updating with {:?}", context.active_box);
         Self {
-            active_box: context.active_box,
+            active_pane: context.active_box,
             animation: self.animation.update(context),
-            rules_list: self.rules_list.update(context),
+            table_list: self.table_list.update(context),
             chains_list: self.chains_list.update(context),
             packet_log: self.packet_log.update(context),
             help_page: self.help_page.update(context),
@@ -67,36 +66,38 @@ impl Component for AppRouter {
             return;
         }
 
-        match self.active_box {
-            ActiveBox::RulesList => {
-                self.rules_list.handle_key_event(key);
+        // Key event is passed onto the current active pane
+        // If none active, the key is hanlded directly here
+        match self.active_pane {
+            ActivePane::TableList => {
+                self.table_list.handle_key_event(key);
             }
-            ActiveBox::ChainsList => {
+            ActivePane::ChainsList => {
                 self.chains_list.handle_key_event(key);
             }
-            ActiveBox::PacketLog => {
+            ActivePane::PacketLog => {
                 self.packet_log.handle_key_event(key);
             }
-            ActiveBox::HelpPage => {
+            ActivePane::HelpPage => {
                 self.help_page.handle_key_event(key);
             }
-            ActiveBox::EditPage => {
+            ActivePane::EditPage => {
                 self.edit_page.handle_key_event(key);
             }
-            ActiveBox::None => match key.code {
+            ActivePane::None => match key.code {
                 KeyCode::Esc => {
                     let _ = self.action_tx.send(Action::Quit);
                 }
                 KeyCode::Char('?') => {
-                    self.action_tx.send(Action::DisplayHelp);
+                    let _ = self.action_tx.send(Action::DisplayHelp);
                 }
                 KeyCode::Char('p') => {
-                    self.action_tx.send(Action::SelectPacketLog);
+                    let _ = self.action_tx.send(Action::SelectPacketLog);
                     debug!("Sending {:?}", Action::SelectPacketLog);
                 }
                 KeyCode::Char('r') => {
-                    self.action_tx.send(Action::SelectRulesList);
-                    debug!("Sending {:?}", Action::SelectRulesList);
+                    let _ = self.action_tx.send(Action::SelectTableList);
+                    debug!("Sending {:?}", Action::SelectTableList);
                 }
                 _ => {}
             },
@@ -104,8 +105,8 @@ impl Component for AppRouter {
     }
 }
 
-impl ComponentRender<()> for AppRouter {
-    fn render(&mut self, frame: &mut ratatui::Frame, props: ()) {
+impl ComponentRender<()> for AppRouter<usize> {
+    fn render(&mut self, frame: &mut ratatui::Frame, _: ()) {
         // Parent layout:
         // 95% for main content
         // 5% for footer at bottom
@@ -114,35 +115,36 @@ impl ComponentRender<()> for AppRouter {
             .constraints(parent_constraints)
             .split(frame.area());
 
-        // Footer to show main keybinds
+        // Footer to show main keybinds based on the active pane
         let block = Block::new().bg(Color::DarkGray);
         let mut text = String::new();
-        match self.active_box {
-            ActiveBox::None => {
+        match self.active_pane {
+            ActivePane::None => {
                 text.push_str(" esc - quit ");
                 text.push_str(" ? - help ");
                 text.push_str(" r - firewall rules ");
                 text.push_str(" p - packet log ");
             }
-            ActiveBox::PacketLog => {
+            ActivePane::PacketLog => {
                 text.push_str(" esc - back ");
                 text.push_str(" ? - help ");
+                text.push_str(" i - select interface");
             }
-            ActiveBox::RulesList => {
+            ActivePane::TableList => {
                 text.push_str(" esc - back ");
                 text.push_str(" enter - expand ");
                 text.push_str(" e - edit ");
                 text.push_str(" ? - help ");
             }
-            ActiveBox::ChainsList => {
+            ActivePane::ChainsList => {
                 text.push_str(" esc - back ");
                 text.push_str(" ? - help ");
             }
-            ActiveBox::EditPage => {
+            ActivePane::EditPage => {
                 text.push_str(" esc - back ");
                 text.push_str(" ? - help ");
             }
-            ActiveBox::HelpPage => {
+            ActivePane::HelpPage => {
                 text.push_str(" esc - back ");
             }
         }
@@ -154,7 +156,7 @@ impl ComponentRender<()> for AppRouter {
 
         frame.render_widget(footer, parent_layout[1]);
 
-        if self.active_box == ActiveBox::HelpPage {
+        if self.active_pane == ActivePane::HelpPage {
             self.help_page.render(
                 frame,
                 Props {
@@ -167,28 +169,28 @@ impl ComponentRender<()> for AppRouter {
         }
 
         // Nested layout (horizontally divides the main content from parent layout):
-        // 70% left panel contains the firewall rules
-        // 30% right panel contains animation and packet log
+        // 70% left pane contains the firewall rules
+        // 30% right pane contains animation and packet log
         let nested_constraints = Constraint::from_percentages([40, 60]);
         let nested_layout = Layout::default()
             .constraints(nested_constraints)
             .direction(Direction::Horizontal)
             .split(parent_layout[0]);
 
-        let right_panel = Layout::default()
+        let right_pane = Layout::default()
             .constraints(Constraint::from_percentages([30, 70]))
             .direction(Direction::Vertical)
             .split(nested_layout[1]);
 
-        // We either display the rules list or the box to edit the rules
-        if self.active_box == ActiveBox::EditPage {
+        // We either display the rules list or the pane to edit the rules
+        if self.active_pane == ActivePane::EditPage {
         } else {
-            self.rules_list.render(
+            self.table_list.render(
                 frame,
                 Props {
                     area: nested_layout[0],
-                    border_color: if self.active_box == ActiveBox::RulesList {
-                        Color::Red
+                    border_color: if self.active_pane == ActivePane::TableList {
+                        Color::Green
                     } else {
                         Color::White
                     },
@@ -199,16 +201,16 @@ impl ComponentRender<()> for AppRouter {
         self.animation.render(
             frame,
             Props {
-                area: right_panel[0],
+                area: right_pane[0],
                 border_color: Color::White,
             },
         );
         self.packet_log.render(
             frame,
             Props {
-                area: right_panel[1],
-                border_color: if self.active_box == ActiveBox::PacketLog {
-                    Color::Red
+                area: right_pane[1],
+                border_color: if self.active_pane == ActivePane::PacketLog {
+                    Color::Green
                 } else {
                     Color::White
                 },

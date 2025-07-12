@@ -7,21 +7,12 @@ use self::{
 };
 use crate::{
     display,
-    firewall::{engine::FirewallEngine, logging::LogEntry, rules::FirewallAction},
+    netlink::{self},
+    packetcap,
 };
-use anyhow::{Result, anyhow};
-use cli_log::{debug, error, log};
-use crossterm::event::KeyCode;
-use serde::de;
-use std::{
-    fmt::format,
-    sync::{Arc, Mutex},
-    time::Duration,
-};
-use tokio::sync::{
-    broadcast::{self},
-    mpsc::{self},
-};
+use anyhow::Result;
+use cli_log::debug;
+use tokio::sync::mpsc::{self};
 
 mod app_router;
 mod components;
@@ -30,9 +21,9 @@ mod event_handler;
 mod ui;
 
 #[derive(Clone, Copy, PartialEq, Debug)]
-pub enum ActiveBox {
+pub enum ActivePane {
     None,
-    RulesList,
+    TableList,
     PacketLog,
     HelpPage,
     EditPage,
@@ -44,19 +35,19 @@ pub struct App {
     ui: UserInterface,
     action_rx: mpsc::UnboundedReceiver<Action>,
     event_handler: EventHandler,
-    logs_rx: broadcast::Receiver<LogEntry>,
 }
 
 impl App {
-    pub fn new(logs_rx: broadcast::Receiver<LogEntry>) -> Result<Self> {
-        let (ui, mut action_rx, mut event_handler) = UserInterface::new();
+    pub fn new() -> Result<Self> {
+        let (ui, action_rx, event_handler) = UserInterface::new();
+
+        netlink::create_test_table();
 
         Ok(Self {
             quit: false,
             ui,
             action_rx,
             event_handler,
-            logs_rx,
         })
     }
 
@@ -65,7 +56,7 @@ impl App {
 
         let mut app_router = AppRouter::new(&context, self.ui.action_tx.clone());
         let mut terminal = display::setup_terminal();
-        terminal.clear();
+        terminal.clear()?;
 
         loop {
             if self.quit {
@@ -94,44 +85,35 @@ impl App {
                             debug!("Quitting app");
                         },
                         Some(Action::Return) => {
-                            context.active_box = ActiveBox::None;
-                            app_router = app_router.update(&context);
+                            context.active_box = ActivePane::None;
                         },
                         Some(Action::DisplayHelp) => {
-                            context.active_box = ActiveBox::HelpPage;
-                            app_router = app_router.update(&context);
+                            context.active_box = ActivePane::HelpPage;
                         },
-                        Some(Action::SelectRulesList) => {
-                            context.active_box = ActiveBox::RulesList;
-                            app_router = app_router.update(&context);
+                        Some(Action::SelectTableList) => {
+                            context.active_box = ActivePane::TableList;
                         },
                         Some(Action::SelectPacketLog) => {
-                            context.active_box = ActiveBox::PacketLog;
-                            app_router = app_router.update(&context);
+                            context.active_box = ActivePane::PacketLog;
+                        },
+                        Some(Action::AttachListener(target_if))=> {
+                            packetcap::start_listener(&target_if).unwrap();
                         },
                         Some(Action::EditRules) => {
-                            context.active_box = ActiveBox::EditPage;
-                            app_router = app_router.update(&context);
+                            context.active_box = ActivePane::EditPage;
                         },
                         None => {},
                     }
 
-                },
-                log_entry = self.logs_rx.recv() => {
-                    match log_entry {
-                        Ok(entry) => {
-                            context.packet_log.push_back(entry);
-                            app_router = app_router.update(&context);
+                    app_router = app_router.update(&context);
 
-                            debug!("Adding new entry to UI packet log");
-                        },
-                        Err(_) => {},
-                    }
                 },
             }
 
             let _ = terminal.draw(|f| app_router.render(f, ()));
         }
+
+        netlink::cleanup_test_tables();
 
         Ok(())
     }
