@@ -1,1 +1,3 @@
 target/
+firewall-rs.log
+firewall.log*
