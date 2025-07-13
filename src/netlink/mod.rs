@@ -45,25 +45,6 @@ pub struct FirewallTable {
     chains: Vec<FirewallChain>,
 }
 
-impl<'a> StatementDisplay for Statement<'a> {
-    fn display_statement(&self) -> String {
-        match self {
-            Statement::Match(expr) => {
-                let left = &expr.left;
-                let right = &expr.right;
-                let op = &expr.op;
-
-                format!("{left:?} {op:?} {right:?}")
-            }
-            _ => "todo".to_string(),
-        }
-    }
-
-    fn fmt_statement(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        Ok(())
-    }
-}
-
 fn iface_index(name: &str) -> Result<libc::c_uint, io::Error> {
     let c_name = CString::new(name)?;
     let index = unsafe { libc::if_nametoindex(c_name.as_ptr()) };
@@ -169,7 +150,16 @@ pub fn build_tree() -> Vec<TreeItem<'static, usize>> {
                 .into_iter()
                 .map(|r| TreeItem::new_leaf(r.0, format_expr(&r.1.expr)))
                 .collect();
-            let node = TreeItem::new(chain_tuple.0, chain.name.clone(), rules_leaves).unwrap();
+            let chain_info = format!(
+                "{:?} {:?} {:?} {:?}",
+                chain._type, chain.prio, chain.family, chain.policy
+            );
+            let node = TreeItem::new(
+                chain_tuple.0,
+                format!("{}: {}", chain.name.clone(), chain_info),
+                rules_leaves,
+            )
+            .unwrap();
             chain_nodes.push(node);
         });
 
