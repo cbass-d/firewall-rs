@@ -1,8 +1,8 @@
 use super::{
     ActivePane,
     components::{
-        Component, ComponentRender, Props, animation::Animation, chains_list::ChainsList,
-        edit_page::EditPage, help_page::HelpPage, packet_log::PacketLog, tables_list::TableList,
+        Component, ComponentRender, Props, chains_list::ChainsList, edit_page::EditPage,
+        help_page::HelpPage, packet_log::PacketLog, tables_list::TableList,
     },
     context::AppContext,
     ui::Action,
@@ -17,25 +17,23 @@ use ratatui::{
 };
 use tokio::sync::mpsc::{self};
 
-pub struct AppRouter<usize> {
-    pub animation: Animation,
+pub struct AppRouter<'a, T> {
     active_pane: ActivePane,
-    table_list: TableList<usize>,
+    table_list: TableList<T>,
     chains_list: ChainsList,
     edit_page: EditPage,
-    packet_log: PacketLog,
+    packet_log: PacketLog<'a>,
     help_page: HelpPage,
     action_tx: mpsc::UnboundedSender<Action>,
 }
 
-impl Component for AppRouter<usize> {
+impl<'a> Component for AppRouter<'a, usize> {
     fn new(context: &AppContext, action_tx: mpsc::UnboundedSender<Action>) -> Self
     where
         Self: Sized,
     {
         Self {
             active_pane: context.active_box,
-            animation: Animation::new(context, action_tx.clone()),
             table_list: TableList::new(context, action_tx.clone()),
             chains_list: ChainsList::new(context, action_tx.clone()),
             packet_log: PacketLog::new(context, action_tx.clone()),
@@ -51,7 +49,6 @@ impl Component for AppRouter<usize> {
     {
         Self {
             active_pane: context.active_box,
-            animation: self.animation.update(context),
             table_list: self.table_list.update(context),
             chains_list: self.chains_list.update(context),
             packet_log: self.packet_log.update(context),
@@ -105,7 +102,7 @@ impl Component for AppRouter<usize> {
     }
 }
 
-impl ComponentRender<()> for AppRouter<usize> {
+impl<'a> ComponentRender<()> for AppRouter<'a, usize> {
     fn render(&mut self, frame: &mut ratatui::Frame, _: ()) {
         // Parent layout:
         // 95% for main content
@@ -170,17 +167,12 @@ impl ComponentRender<()> for AppRouter<usize> {
 
         // Nested layout (horizontally divides the main content from parent layout):
         // 70% left pane contains the firewall rules
-        // 30% right pane contains animation and packet log
+        // 30% right pane contains packet log
         let nested_constraints = Constraint::from_percentages([40, 60]);
         let nested_layout = Layout::default()
             .constraints(nested_constraints)
             .direction(Direction::Horizontal)
             .split(parent_layout[0]);
-
-        let right_pane = Layout::default()
-            .constraints(Constraint::from_percentages([30, 70]))
-            .direction(Direction::Vertical)
-            .split(nested_layout[1]);
 
         // We either display the rules list or the pane to edit the rules
         if self.active_pane == ActivePane::EditPage {
@@ -198,17 +190,10 @@ impl ComponentRender<()> for AppRouter<usize> {
             );
         }
 
-        self.animation.render(
-            frame,
-            Props {
-                area: right_pane[0],
-                border_color: Color::White,
-            },
-        );
         self.packet_log.render(
             frame,
             Props {
-                area: right_pane[1],
+                area: nested_layout[1],
                 border_color: if self.active_pane == ActivePane::PacketLog {
                     Color::Green
                 } else {

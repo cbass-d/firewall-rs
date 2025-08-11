@@ -2,37 +2,19 @@ use super::{Action, AppContext, Component, ComponentRender, Props};
 use crate::netlink::{self};
 use cli_log::debug;
 use crossterm::event::{KeyCode, KeyEvent};
-use ratatui::widgets::{Cell, Row};
 use ratatui::{
     prelude::*,
     style::{Color, Style},
-    text::{Line, Span, Text},
-    widgets::{
-        Block, Borders, HighlightSpacing, List, ListDirection, ListState, Padding, Paragraph,
-        Table, TableState, Tabs,
-    },
+    widgets::{Block, Borders, Paragraph, Tabs},
 };
-use std::collections::HashSet;
 use tokio::sync::mpsc::{self};
 use tui_tree_widget::{Tree, TreeState};
 
-pub struct TableList<usize> {
+pub struct TableList<T> {
     current_tab: usize,
     total_tabs: usize,
     action_tx: mpsc::UnboundedSender<Action>,
-    nft_tables: Vec<String>,
-    tree_state: TreeState<usize>,
-}
-
-fn format_rule_set<T: std::fmt::Display>(set: &HashSet<usize>) -> String {
-    if set.is_empty() {
-        return "Empty".to_string();
-    }
-
-    set.iter()
-        .map(|item| item.to_string())
-        .collect::<Vec<_>>()
-        .join(",")
+    tree_state: TreeState<T>,
 }
 
 impl TableList<usize> {
@@ -49,8 +31,6 @@ impl TableList<usize> {
     fn clamp_tab(&mut self) {
         self.current_tab = self.current_tab.clamp(0, self.total_tabs - 1);
     }
-
-    //fn expand_current_table(&mut self, idx: usize) {}
 }
 
 impl Component for TableList<usize> {
@@ -58,12 +38,9 @@ impl Component for TableList<usize> {
     where
         Self: Sized,
     {
-        let table_names = netlink::get_table_names();
-
         Self {
             current_tab: 0,
             total_tabs: 1,
-            nft_tables: table_names,
             action_tx,
             tree_state: TreeState::default(),
         }
@@ -77,7 +54,6 @@ impl Component for TableList<usize> {
             current_tab: self.current_tab,
             total_tabs: self.total_tabs,
             action_tx: self.action_tx,
-            nft_tables: self.nft_tables,
             tree_state: self.tree_state,
         }
     }
@@ -139,8 +115,8 @@ impl ComponentRender<Props> for TableList<usize> {
 
         frame.render_widget(tabs, layout[0]);
 
-        if !self.nft_tables.is_empty() {
-            let tree_nodes = netlink::build_tree();
+        let tree_nodes = netlink::build_tree();
+        if !tree_nodes.is_empty() {
             let tree = Tree::new(&tree_nodes)
                 .unwrap()
                 .block(
@@ -158,29 +134,5 @@ impl ComponentRender<Props> for TableList<usize> {
 
             frame.render_widget(text, layout[1]);
         }
-
-        //       let fields = [
-        //           "Source IPs",
-        //           "Destination Ips",
-        //           "Source Networks",
-        //           "Destination Networks",
-        //           "Source Ports",
-        //           "Destination Ports",
-        //       ];
-
-        //        let values = [];
-
-        //        let rows: Vec<Row> = fields
-        //            .iter()
-        //            .zip(values.iter())
-        //            .enumerate()
-        //            .map(|(i, (name, value))| Row::new(vec![Cell::from(*name), Cell::from(value.as_str())]))
-        //            .collect();
-        //
-        //        let table =
-        //            Table::new(rows, [Constraint::Min(0), Constraint::Min(0)]).block(Block::default());
-
-        //        frame.render_widget(table, layout[1]);
-        //
     }
 }

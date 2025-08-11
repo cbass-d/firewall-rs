@@ -1,11 +1,9 @@
-use cli_log::debug;
 use nftables::expr::Expression;
 use nftables::expr::NamedExpression;
 use nftables::expr::{
-    CTDir, CTFamily, MetaKey, Payload, PayloadBase, RTFamily, RTKey, SetItem, SocketAttr, Verdict,
+    CTDir, CTFamily, MetaKey, Payload, PayloadBase, RTFamily, RTKey, SetItem, Verdict,
 };
 use nftables::stmt::Counter;
-use nftables::stmt::Match;
 use nftables::stmt::Operator;
 use nftables::stmt::Statement;
 
@@ -215,15 +213,5 @@ impl<'a> StatementDisplay for Statement<'a> {
             Statement::Counter(ctr) => ctr.display_counter(),
             _ => "todo".to_string(),
         }
-    }
-}
-
-pub trait MatchExprDisplay {
-    fn display_match_expr(&self) -> String;
-}
-
-impl<'a> MatchExprDisplay for Match<'a> {
-    fn display_match_expr(&self) -> String {
-        "todo".to_string()
     }
 }

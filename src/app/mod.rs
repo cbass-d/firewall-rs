@@ -8,7 +8,7 @@ use self::{
 use crate::{
     display,
     netlink::{self},
-    packetcap,
+    packetcap::packet::PacketInfo,
 };
 use anyhow::Result;
 use cli_log::debug;
@@ -41,7 +41,7 @@ impl App {
     pub fn new() -> Result<Self> {
         let (ui, action_rx, event_handler) = UserInterface::new();
 
-        netlink::create_test_table();
+        let _ = netlink::create_test_table();
 
         Ok(Self {
             quit: false,
@@ -81,7 +81,6 @@ impl App {
                     match app_event {
                         Some(Action::Quit) => {
                             self.quit = true;
-
                             debug!("Quitting app");
                         },
                         Some(Action::Return) => {
@@ -96,11 +95,27 @@ impl App {
                         Some(Action::SelectPacketLog) => {
                             context.active_box = ActivePane::PacketLog;
                         },
-                        Some(Action::AttachListener(target_if))=> {
-                            packetcap::start_listener(&target_if).unwrap();
-                        },
                         Some(Action::EditRules) => {
                             context.active_box = ActivePane::EditPage;
+                        },
+                        Some(Action::StartListener(target_if, packet_tx)) => {
+                        let _ = tokio::task::spawn_blocking(move || {
+                            let mut cap = pcap::Capture::from_device(target_if)
+                                .unwrap()
+                                .open()
+                                .unwrap();
+                            while let Ok(packet) = cap.next_packet() {
+                                //if let Ok(_) = shutdown_rx.try_recv() {
+                                //    break;
+                                //}
+                                let packet_info = PacketInfo::build(&packet);
+                                let _ = packet_tx.send(packet_info);
+
+                                debug!("PACKET SENT");
+                            }
+
+                            std::thread::sleep(std::time::Duration::from_millis(1));
+                        }).await;
                         },
                         None => {},
                     }

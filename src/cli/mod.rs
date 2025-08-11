@@ -8,10 +8,10 @@ use tokio::{
 
 // Runs the main logic of the application
 pub async fn run() -> Result<()> {
-    let context = AppContext::new();
-    let mut app = App::new().unwrap();
+    let (shutdown_tx, shutdown_rx) = broadcast::channel::<()>(1);
 
-    let (shutdown_tx, _shutdown_rx) = broadcast::channel::<()>(1);
+    let context = AppContext::new(shutdown_rx.resubscribe());
+    let mut app = App::new().unwrap();
 
     let mut task_set = JoinSet::new();
 

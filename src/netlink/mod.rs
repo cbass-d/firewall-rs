@@ -1,25 +1,27 @@
 mod nlmsg;
 mod statement;
+mod types;
 
+use ratatui::text::Text;
 use statement::StatementDisplay;
-use std::fmt;
 
 use anyhow::Result;
 use cli_log::debug;
 use nfq::Queue;
-use nftables::stmt::Statement;
 use nftnl::{
     Batch, Chain as nftnlChain, ChainType as nftnlChainType, FinalizedBatch, Hook as nftnlHook,
     Policy as nftnlPolicy, ProtoFamily, Rule as nftnlRule, Table as nftnlTable, nft_expr,
 };
-use rustables::{Chain, ChainPolicy, ChainPriority, ChainType, Hook, ProtocolFamily, Rule, Table};
-use tui_tree_widget::{Tree, TreeItem, TreeState};
+use rustables::{ChainPolicy, ChainType, Hook};
+use tui_tree_widget::TreeItem;
 
 use std::{
     borrow::Cow,
     ffi::CString,
     io::{self},
 };
+
+use crate::netlink::types::*;
 
 const CHAIN_NAME: &str = "some-chain-name";
 const ALLOW_NAME: &str = "allow-name";
@@ -28,21 +30,11 @@ const LOG_NAME: &str = "log-name";
 const TEST_TABLE: &str = "test-table";
 const TEST_CHAIN: &str = "test-chain";
 
-pub struct FirewallRule {
-    protocol: ProtocolFamily,
-}
-
 pub struct FirewallChain {
     name: String,
     chain_type: ChainType,
     hook_class: Hook,
     policy: ChainPolicy,
-}
-
-pub struct FirewallTable {
-    name: String,
-    protocol: ProtocolFamily,
-    chains: Vec<FirewallChain>,
 }
 
 fn iface_index(name: &str) -> Result<libc::c_uint, io::Error> {
@@ -96,19 +88,34 @@ pub fn format_expr(expr: &Cow<'_, [nftables::stmt::Statement]>) -> String {
     expr[0].display_statement()
 }
 
+pub fn format_chain_info<'a>(chain: &nftables::schema::Chain<'a>) -> Text<'a> {
+    let family = chain.family.display_family();
+    let name = chain.name.clone();
+    let _type = chain
+        ._type
+        .map_or("-".to_string(), |t| t.display_chain_type());
+    let policy = chain
+        .policy
+        .map_or("-".to_string(), |p| p.display_chain_policy());
+    let prio = chain.prio.map_or("-".to_string(), |p| p.to_string());
+    let hook = chain
+        .hook
+        .map_or("-".to_string(), |h| h.display_chain_hook());
+
+    let info = Text::from(format!("{name}\n {family} {_type} {policy} {prio} {hook}"));
+
+    info
+}
+
 pub fn build_tree() -> Vec<TreeItem<'static, usize>> {
     let ruleset_raw =
         nftables::helper::get_current_ruleset().expect("Unable to get active ruleset: {e}");
+
     debug!("objects: {:?}", ruleset_raw.objects);
 
     let mut table_objs = vec![];
-    let mut table_idx: usize = 0;
-
-    let mut chain_idx: usize = 0;
     let mut chain_objs = vec![];
-
     let mut rule_objs = vec![];
-    let mut rule_idx: usize = 0;
 
     let mut table_idx = 0;
     let mut chain_idx = 0;
@@ -150,16 +157,8 @@ pub fn build_tree() -> Vec<TreeItem<'static, usize>> {
                 .into_iter()
                 .map(|r| TreeItem::new_leaf(r.0, format_expr(&r.1.expr)))
                 .collect();
-            let chain_info = format!(
-                "{:?} {:?} {:?} {:?}",
-                chain._type, chain.prio, chain.family, chain.policy
-            );
-            let node = TreeItem::new(
-                chain_tuple.0,
-                format!("{}: {}", chain.name.clone(), chain_info),
-                rules_leaves,
-            )
-            .unwrap();
+            let chain_info = format_chain_info(chain);
+            let node = TreeItem::new(chain_tuple.0, chain_info, rules_leaves).unwrap();
             chain_nodes.push(node);
         });
 
@@ -191,83 +190,6 @@ pub fn build_tree() -> Vec<TreeItem<'static, usize>> {
     //    table_objs.push(table_node);
     //    table_idx += 1;
     //});
-}
-
-pub fn expand_table(name: String) -> Vec<FirewallChain> {
-    debug!("Expanding table \"{name}\"");
-
-    let table = rustables::list_tables()
-        .unwrap()
-        .into_iter()
-        .find(|t| *t.get_name().unwrap() == name)
-        .unwrap();
-
-    let nft_chains = rustables::list_chains_for_table(&table);
-    let mut chains = vec![];
-    match nft_chains {
-        Ok(nft_chains) => {
-            nft_chains.iter().for_each(|c| {
-                debug!("current chain: {c:?}");
-
-                chains.push(FirewallChain {
-                    name: c
-                        .get_name()
-                        .map_or("unamed".to_string(), |name| name.to_string()),
-                    chain_type: c.get_type().unwrap().clone(),
-                    policy: c.get_policy().unwrap().clone(),
-                    hook_class: c.get_hook().unwrap().clone(),
-                });
-            });
-        }
-        Err(e) => {
-            debug!("Error getting chains: {e}");
-        }
-    }
-
-    chains
-}
-
-pub fn expand_chain(chain: String, table: String) -> Vec<String> {
-    debug!("Expanding rules for chain: \"{chain}\"");
-    let table = rustables::list_tables()
-        .unwrap()
-        .into_iter()
-        .find(|t| *t.get_name().unwrap() == table)
-        .unwrap();
-
-    let chain = rustables::list_chains_for_table(&table)
-        .unwrap()
-        .into_iter()
-        .find(|c| *c.get_name().unwrap() == chain)
-        .unwrap();
-
-    let nft_rules = rustables::list_rules_for_chain(&chain);
-    let mut rules = vec![];
-    match nft_rules {
-        Ok(nft_rules) => {
-            nft_rules.iter().for_each(|r| {
-                rules.push(expand_rule(r));
-            });
-        }
-        Err(e) => {
-            debug!("Error getting rules for chain: {e}");
-        }
-    }
-
-    rules
-}
-
-pub fn expand_rule(rule: &Rule) -> String {
-    let expressions = rule.get_expressions().ok_or("No expressions").unwrap();
-
-    debug!("Expressions for rule: {:?}", expressions);
-    let mut expr_idx: usize = 0;
-    expressions.iter().for_each(|e| {
-        debug!("expression: {:?}", e);
-        expr_idx += 1;
-    });
-
-    format!("{expressions:?}")
 }
 
 pub fn create_test_table() -> Result<()> {

@@ -1,4 +1,6 @@
 use super::EventHandler;
+use crate::packetcap::packet::PacketInfo;
+use pcap::Device;
 use tokio::sync::mpsc::{self};
 
 #[derive(Clone, Debug)]
@@ -7,7 +9,7 @@ pub enum Action {
     Return,
     SelectTableList,
     SelectPacketLog,
-    AttachListener(String),
+    StartListener(Device, mpsc::Sender<PacketInfo>),
     DisplayHelp,
     EditRules,
 }
